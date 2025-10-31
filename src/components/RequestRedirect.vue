@@ -1,38 +1,28 @@
 <script setup lang="ts">
 import {ref, onMounted} from 'vue'
+import { toRaw } from 'vue';
 import {updateDynamicRules, saveRuleList, loadRuleList} from '../api/chromeApi'
 import type {Rule} from '../types'
 
-onMounted(() => {
-  const ruleList: Rule[] = loadRuleList()
-  ruleListRef.value = ruleList
+onMounted(async () => {
+  const ruleList: Rule[] = await loadRuleList()
+  console.log('获取看看什么类型', ruleList.toString())
+  ruleListRef.value = ruleList;
 })
 const ruleTest = ref({
   url: '',
   result: '',
 })
 
-const ruleListRef = ref([
-      {
-        id: 1,
-        match: '',
-        replace: '',
-        enabled: true,
-        isEditing: false,
-      },
-      {
-        id: 2,
-        match: '',
-        replace: '',
-        enabled: false,
-        isEditing: true,
-      }
-    ] as Rule[]
-)
+const ruleListRef = ref([] as Rule[])
+
+function generateRuleId(): number {
+  return Math.floor(Math.random() * 1000000000) + 1; // 1 ~ 999,999,999
+}
 
 function addRule(): void {
   const rule = {
-    id: Date.now(),
+    id: generateRuleId(),
     match: '',
     replace: '',
     enabled: true,
@@ -43,7 +33,8 @@ function addRule(): void {
 
 function saveRule(rule: Rule): void {
   rule.isEditing = false
-  saveRuleList(ruleListRef.value);
+  console.log('最新列表数值：' + JSON.stringify(ruleListRef.value))
+  saveRuleList(toRaw(ruleListRef.value));
   updateDynamicRules(ruleListRef.value, true)
 }
 
@@ -81,7 +72,7 @@ function removeRule(id: number): void {
 </script>
 
 <template>
-  <div class="card" style="width: 600px">
+  <div class="card" style="width: 500px">
     <n-form-item label="待测试URL" path="url">
       <n-input v-model:value="ruleTest.url" placeholder="请输入URL(可输入部分内容)"/>
     </n-form-item>
@@ -92,7 +83,7 @@ function removeRule(id: number): void {
 
   <h4>规则列表</h4>
   <div v-for="(rule, index) in ruleListRef" :key="index" class="card"
-       style="width: 600px; margin: 14px 0; display: flex; gap: 10px; align-items: center;">
+       style="width: 500px; margin: 14px 0; display: flex; gap: 10px; align-items: center;">
     <n-input type="text" class="rule-input" v-model:value="rule.match" :disabled="!rule.isEditing"
              placeholder="匹配值，支持正则"/>
     <n-input type="text" class="rule-input" v-model:value="rule.replace" :disabled="!rule.isEditing"

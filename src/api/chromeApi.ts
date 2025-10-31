@@ -1,13 +1,4 @@
-import 'chrome'
-
-/**
- * 规则数据结构（来自存储）
- */
-interface Rule {
-    match: string;
-    replace: string;
-    enabled: boolean;
-}
+import type {Rule} from '../types'
 
 /**
  * Chrome 声明式网络请求规则
@@ -24,12 +15,17 @@ interface DeclarativeRule {
  */
 export async function loadRuleList(): Promise<Rule[]> {
     const data = await getStorage(['ruleList', 'enabled', 'testUrl']);
+    console.log('读取：' + data)
     const ruleList: Rule[] = data.ruleList || [];
-    return ruleList;
+    return ruleList
 }
 
+
 export function saveRuleList(ruleList: Rule[]): void {
-    chrome.storage.sync.set({ruleList})
+    console.log('保存规则' + ruleList.toString())
+    console.log('Is array?', Array.isArray(ruleList))
+    chrome.storage.sync.set({'ruleList': ruleList})
+    chrome.storage.sync.set({users: [{'name': 'sunny', 'age': 123}]})
 }
 
 export function getStorage(keys: string[]): Promise<Record<string, any>> {
@@ -38,38 +34,52 @@ export function getStorage(keys: string[]): Promise<Record<string, any>> {
             if (chrome.runtime.lastError) {
                 reject(chrome.runtime.lastError);
             } else {
+                console.log('获取存储 Is array?', Array.isArray(result.ruleList))
                 resolve(result);
             }
         });
     });
 }
 
+export async function disablePlugin(): Promise<void> {
+    const dynamicRules = await chrome.declarativeNetRequest.getDynamicRules();
+    console.log({dynamicRules});
+    const removeRuleIds = dynamicRules.map(rule => rule.id);
+    await chrome.declarativeNetRequest.updateDynamicRules({
+        removeRuleIds,
+        addRules: []
+    });
+    return;
+}
+
+export async function enablePlugin(): Promise<void> {
+    const dynamicRules = await chrome.declarativeNetRequest.getDynamicRules();
+    console.log({dynamicRules});
+    const removeRuleIds = dynamicRules.map(rule => rule.id);
+    await chrome.declarativeNetRequest.updateDynamicRules({
+        removeRuleIds,
+        addRules: []
+    });
+    return;
+}
+
 /**
  * 更新声明性网络请求规则
- * @param rules 规则列表
+ * @param ruleList 规则列表
  * @param enabled 启用状态
  */
-export async function updateDynamicRules(rules: Rule[], enabled: boolean): Promise<void> {
-    if (!enabled) {
-        const dynamicRules = await chrome.declarativeNetRequest.getDynamicRules();
-        console.log({dynamicRules});
-        const removeRuleIds = dynamicRules.map(rule => rule.id);
-        await chrome.declarativeNetRequest.updateDynamicRules({
-            removeRuleIds,
-            addRules: []
-        });
-        return;
-    }
+export async function updateDynamicRules(ruleList: Rule[], enabled: boolean): Promise<void> {
 
-    const declarativeRules: DeclarativeRule[] = rules
-        .map((rule, index): DeclarativeRule | null => {
+    console.log('更新规则' + ruleList.toString(), enabled)
+    const declarativeRules: DeclarativeRule[] = ruleList
+        .map((rule): DeclarativeRule | null => {
             const valid = rule.enabled && rule.match && rule.replace;
             if (!valid) {
                 return null;
             }
             try {
                 return {
-                    id: index + 1,
+                    id: rule.id,
                     priority: 1,
                     action: {
                         type: 'redirect',
@@ -92,7 +102,7 @@ export async function updateDynamicRules(rules: Rule[], enabled: boolean): Promi
         .filter((rule): rule is DeclarativeRule => rule !== null); // 类型守卫
 
     await chrome.declarativeNetRequest.updateDynamicRules({
-        removeRuleIds: rules.map((_, index) => index + 1),
+        removeRuleIds: ruleList.map((rule) => rule.id),
         addRules: declarativeRules
     });
 
@@ -129,12 +139,12 @@ chrome.storage.sync.onChanged.addListener(() => {
  * 初始化：设置默认禁用状态
  */
 chrome.runtime.onInstalled.addListener(() => {
-    chrome.storage.sync.get(['rules', 'enabled'], (data) => {
-        const rules = (data.rules?.value as Rule[]) || [];
+    chrome.storage.sync.get(['ruleList', 'enabled'], (data) => {
+        const ruleList = (data.ruleList?.value as Rule[]) || [];
         const enabled =
             data.enabled?.value === undefined ? false : (data.enabled.value as boolean);
         chrome.storage.sync.set({enabled}, () => {
-            updateDynamicRules(rules, enabled);
+            updateDynamicRules(ruleList, enabled);
             updateIcon(enabled);
         });
     });

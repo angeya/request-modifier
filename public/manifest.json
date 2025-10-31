@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "请求修改器",
+  "version": "1.0",
+  "description": "拦截HTTP请求并根据配置规则修改URL，支持Chrome和Edge。",
+  "permissions": [
+    "declarativeNetRequest",
+    "storage"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "index.html",
+    "default_icon": {
+      "128": "icon_disabled.png"
+    }
+  },
+  "icons": {
+    "128": "icon_disabled.png"
+  }
+}
