@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import {ref, onMounted} from 'vue'
-import { toRaw } from 'vue';
-import {updateDynamicRules, saveRuleList, loadRuleList} from '../api/chromeApi'
+import {onMounted, ref, toRaw} from 'vue'
+import {loadRuleList, saveRuleList, updateDynamicRules} from '../api/chromeApi'
 import type {Rule} from '../types'
 
 onMounted(async () => {
@@ -16,10 +15,16 @@ const ruleTest = ref({
 
 const ruleListRef = ref([] as Rule[])
 
+/**
+ * 生成规则id
+ */
 function generateRuleId(): number {
-  return Math.floor(Math.random() * 1000000000) + 1; // 1 ~ 999,999,999
+  return Math.floor(Math.random() * 1000000000) + 1;
 }
 
+/**
+ * 添加规则
+ */
 function addRule(): void {
   const rule = {
     id: generateRuleId(),
@@ -31,15 +36,32 @@ function addRule(): void {
   ruleListRef.value.push(rule)
 }
 
+/**
+ * 保存规则
+ */
 function saveRule(rule: Rule): void {
-  rule.isEditing = false
   console.log('最新列表数值：' + JSON.stringify(ruleListRef.value))
-  saveRuleList(toRaw(ruleListRef.value));
-  updateDynamicRules(ruleListRef.value, true)
+  rule.isEditing = false
+  doSaveRule()
 }
 
+/**
+ * 保存规则
+ */
+function doSaveRule(): void {
+  console.log('最新列表数值：' + JSON.stringify(ruleListRef.value))
+  // 数据持久化的时候需要脱响应式，否则数据机构可能与预期不符
+  saveRuleList(toRaw(ruleListRef.value));
+  updateDynamicRules(ruleListRef.value)
+}
+
+/**
+ * 删除规则
+ * @param id
+ */
 function removeRule(id: number): void {
   ruleListRef.value = ruleListRef.value.filter(rule => rule.id !== id)
+  doSaveRule()
 }
 
 
@@ -88,9 +110,9 @@ function removeRule(id: number): void {
              placeholder="匹配值，支持正则"/>
     <n-input type="text" class="rule-input" v-model:value="rule.replace" :disabled="!rule.isEditing"
              placeholder="替换值"/>
-    <n-switch v-model:value="rule.enabled" @update:value=""/>
-    <n-button v-if="rule.isEditing" type="success" size="small" @click="saveRule(rule)">保存</n-button>
-    <n-button v-else type="warning" size="small" @click="rule.isEditing=true">编辑</n-button>
+    <n-switch v-model:value="rule.enabled" @update:value="doSaveRule()"/>
+    <n-button v-show="rule.isEditing" type="success" size="small" @click="saveRule(rule)">保存</n-button>
+    <n-button v-show="!rule.isEditing" type="warning" size="small" @click="rule.isEditing=true">编辑</n-button>
     <n-button type="error" size="small" @click="removeRule(rule.id)">删除</n-button>
   </div>
   <n-button type="info" @click="addRule">添加规则</n-button>

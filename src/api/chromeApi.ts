@@ -4,10 +4,25 @@ import type {Rule} from '../types'
  * Chrome 声明式网络请求规则
  */
 interface DeclarativeRule {
+    /**
+     * id，int范围
+     */
     id: number;
+
+    /**
+     * 优先级
+     */
     priority: number;
-    action: chrome.declarativeNetRequest.RuleAction;
+
+    /**
+     * 规则条件，如规则应该匹配什么样的请求。匹配什么样的路径
+     */
     condition: chrome.declarativeNetRequest.RuleCondition;
+
+    /**
+     * 请求被匹配之后，所什么操作？请求重定向、路径替换等
+     */
+    action: chrome.declarativeNetRequest.RuleAction;
 }
 
 /**
@@ -20,12 +35,14 @@ export async function loadRuleList(): Promise<Rule[]> {
     return ruleList
 }
 
-
-export function saveRuleList(ruleList: Rule[]): void {
+/**
+ * 规则列表持久化
+ * @param ruleList 规则列表
+ */
+export async function saveRuleList(ruleList: Rule[]): Promise<void> {
     console.log('保存规则' + ruleList.toString())
-    console.log('Is array?', Array.isArray(ruleList))
-    chrome.storage.sync.set({'ruleList': ruleList})
-    chrome.storage.sync.set({users: [{'name': 'sunny', 'age': 123}]})
+    await chrome.storage.sync.set({'ruleList': ruleList})
+    await updateDynamicRules(ruleList)
 }
 
 export function getStorage(keys: string[]): Promise<Record<string, any>> {
@@ -41,6 +58,9 @@ export function getStorage(keys: string[]): Promise<Record<string, any>> {
     });
 }
 
+/**
+ * 禁用插件
+ */
 export async function disablePlugin(): Promise<void> {
     const dynamicRules = await chrome.declarativeNetRequest.getDynamicRules();
     console.log({dynamicRules});
@@ -52,29 +72,24 @@ export async function disablePlugin(): Promise<void> {
     return;
 }
 
+/**
+ * 启用插件
+ */
 export async function enablePlugin(): Promise<void> {
-    const dynamicRules = await chrome.declarativeNetRequest.getDynamicRules();
-    console.log({dynamicRules});
-    const removeRuleIds = dynamicRules.map(rule => rule.id);
-    await chrome.declarativeNetRequest.updateDynamicRules({
-        removeRuleIds,
-        addRules: []
-    });
-    return;
+    const ruleList: Rule[] = await loadRuleList()
+    await updateDynamicRules(ruleList)
 }
 
 /**
  * 更新声明性网络请求规则
  * @param ruleList 规则列表
- * @param enabled 启用状态
  */
-export async function updateDynamicRules(ruleList: Rule[], enabled: boolean): Promise<void> {
-
-    console.log('更新规则' + ruleList.toString(), enabled)
+export async function updateDynamicRules(ruleList: Rule[]): Promise<void> {
+    console.log('更新规则' + ruleList.toString())
     const declarativeRules: DeclarativeRule[] = ruleList
         .map((rule): DeclarativeRule | null => {
-            const valid = rule.enabled && rule.match && rule.replace;
-            if (!valid) {
+            const isValid = rule.enabled && rule.match && rule.replace;
+            if (!isValid) {
                 return null;
             }
             try {
@@ -100,7 +115,6 @@ export async function updateDynamicRules(ruleList: Rule[], enabled: boolean): Pr
             }
         })
         .filter((rule): rule is DeclarativeRule => rule !== null); // 类型守卫
-
     await chrome.declarativeNetRequest.updateDynamicRules({
         removeRuleIds: ruleList.map((rule) => rule.id),
         addRules: declarativeRules
@@ -127,10 +141,11 @@ function updateIcon(enabled: boolean): void {
  * 监听存储变化
  */
 chrome.storage.sync.onChanged.addListener(() => {
+    console.log('插件数据变化')
     chrome.storage.sync.get(['rules', 'enabled'], (data) => {
         const rules = (data.rules?.value as Rule[]) || [];
         const enabled = data.enabled?.value !== false;
-        updateDynamicRules(rules, enabled);
+        updateDynamicRules(rules);
         updateIcon(enabled);
     });
 });
@@ -139,12 +154,13 @@ chrome.storage.sync.onChanged.addListener(() => {
  * 初始化：设置默认禁用状态
  */
 chrome.runtime.onInstalled.addListener(() => {
+    console.log('插件初始化')
     chrome.storage.sync.get(['ruleList', 'enabled'], (data) => {
         const ruleList = (data.ruleList?.value as Rule[]) || [];
         const enabled =
             data.enabled?.value === undefined ? false : (data.enabled.value as boolean);
         chrome.storage.sync.set({enabled}, () => {
-            updateDynamicRules(ruleList, enabled);
+            updateDynamicRules(ruleList);
             updateIcon(enabled);
         });
     });
