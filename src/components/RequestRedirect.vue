@@ -94,7 +94,7 @@ function removeRule(id: number): void {
 </script>
 
 <template>
-  <div class="card" style="width: 500px">
+  <div class="card" style="width: 480px">
     <n-form-item label="待测试URL" path="url">
       <n-input v-model:value="ruleTest.url" placeholder="请输入URL(可输入部分内容)"/>
     </n-form-item>
@@ -105,7 +105,7 @@ function removeRule(id: number): void {
 
   <h4>规则列表</h4>
   <div v-for="(rule, index) in ruleListRef" :key="index" class="card"
-       style="width: 500px; margin: 14px 0; display: flex; gap: 10px; align-items: center;">
+       style="width: 480px; margin: 14px 0; display: flex; gap: 10px; align-items: center;">
     <n-input type="text" class="rule-input" v-model:value="rule.match" :disabled="!rule.isEditing"
              placeholder="匹配值，支持正则"/>
     <n-input type="text" class="rule-input" v-model:value="rule.replace" :disabled="!rule.isEditing"
@@ -115,7 +115,7 @@ function removeRule(id: number): void {
     <n-button v-show="!rule.isEditing" type="warning" size="small" @click="rule.isEditing=true">编辑</n-button>
     <n-button type="error" size="small" @click="removeRule(rule.id)">删除</n-button>
   </div>
-  <n-button type="info" @click="addRule">添加规则</n-button>
+  <n-button type="info" @click="addRule" size="small">添加规则</n-button>
 
 </template>
 
