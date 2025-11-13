@@ -116,7 +116,8 @@ export async function updateDynamicRules(ruleList: Rule[]): Promise<void> {
                     },
                     condition: {
                         regexFilter: rule.match,
-                        resourceTypes: ['main_frame', 'sub_frame', 'xmlhttprequest', 'other'],
+                        resourceTypes: ['main_frame', 'sub_frame', 'xmlhttprequest', 'websocket',
+                            'media', 'image', 'stylesheet','object','font','webtransport','ping','other'],
                         excludedRequestDomains: [],
                         isUrlFilterCaseSensitive: false
                     }
