@@ -29,7 +29,7 @@ function disable() {
 </script>
 
 <template>
-  <div style="display: flex; align-items: center;" >
+  <div style="display: flex; align-items: center;">
     <h3 style="color: #242424">请求修改器</h3>
     <n-button style="margin-left: 20px" v-show="pluginStatus" type="success" ghost @click="disable">
       <img src="./assets/power-on.svg" alt="">
@@ -40,20 +40,23 @@ function disable() {
     <p v-show="pluginStatus" style="margin-left: 8px; color: #18a058; font-weight: bolder">努力工作中...</p>
     <p v-show="!pluginStatus" style="margin-left: 8px; color: #515151; font-weight: bolder">安心休息中...</p>
     <img v-show="pluginStatus" style="height: 32px; width: 32px; margin-left: auto" src="./assets/cat-work.gif" alt="">
-    <img v-show="!pluginStatus" style="height: 32px; width: 32px; margin-left: auto" src="./assets/cat-sleep.gif" alt="">
+    <img v-show="!pluginStatus" style="height: 32px; width: 32px; margin-left: auto" src="./assets/cat-sleep.gif"
+         alt="">
   </div>
 
-  <n-tabs type="line" animated>
-    <n-tab-pane name="requestRedirect" tab="请求重定向" class="tab-pane">
-      <request-redirect></request-redirect>
-    </n-tab-pane>
-    <n-tab-pane name="apiRequest" tab="请求头修改" class="tab-pane">
-      <api-request></api-request>
-    </n-tab-pane>
-    <n-tab-pane name="headerModify" tab="接口请求" class="tab-pane">
-      <header-modify></header-modify>
-    </n-tab-pane>
-  </n-tabs>
+  <n-message-provider>
+    <n-tabs type="line" animated>
+      <n-tab-pane name="requestRedirect" tab="请求重定向" class="tab-pane">
+        <request-redirect></request-redirect>
+      </n-tab-pane>
+      <n-tab-pane name="headerModify" tab="请求头修改" class="tab-pane">
+        <header-modify></header-modify>
+      </n-tab-pane>
+      <n-tab-pane name="apiRequest" tab="接口请求" class="tab-pane">
+        <api-request></api-request>
+      </n-tab-pane>
+    </n-tabs>
+  </n-message-provider>
 </template>
 
 <style scoped>

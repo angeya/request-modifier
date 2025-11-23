@@ -28,7 +28,7 @@ body {
     background-color: #f5f7fa;
     padding: 16px;
     height: 100%;
-    width: 544px;
+    width: 538px;
 }
 
 h1 {
@@ -70,7 +70,6 @@ button:focus-visible {
 #app {
     max-width: 1280px;
     margin: 0 auto;
-    padding: 8px;
 }
 
 @media (prefers-color-scheme: light) {
