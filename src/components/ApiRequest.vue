@@ -1,55 +1,54 @@
 <template>
-  123456
-  <n-card title="HTTP 接口调试工具 (Fetch Import)" style="margin: 20px; max-width: 1200px">
-    <n-collapse style="margin-bottom: 20px">
-      <n-collapse-item title="📥 导入 Fetch 代码 (支持 Chrome DevTools Copy as fetch)" name="1">
-        <n-input
-            v-model:value="importCode"
-            type="textarea"
-            placeholder="在此粘贴 fetch(...) 代码"
-            :autosize="{ minRows: 3, maxRows: 10 }"
-        />
-        <n-space style="margin-top: 10px" justify="end">
-          <n-button type="primary" secondary @click="handleImport">
-            识别并填入参数
-          </n-button>
-        </n-space>
-      </n-collapse-item>
-    </n-collapse>
+  <n-card style="max-width: 1200px">
+    <n-button type="primary" secondary @click="handleImport">
+      从剪切板导入fetch api
+    </n-button>
+<!--    <n-collapse style="margin-bottom: 20px">-->
+<!--      <n-collapse-item title="📥 导入 Fetch 代码 (支持 DevTools Copy as fetch)" name="1">-->
+<!--        <n-input v-model:value="importCode"-->
+<!--                 type="textarea"-->
+<!--                 placeholder="在此粘贴 fetch(...) 代码"-->
+<!--                 :autosize="{ minRows: 3, maxRows: 10 }"/>-->
+<!--        <n-space style="margin-top: 10px" justify="end">-->
+<!--          <n-button type="primary" secondary @click="handleImport">-->
+<!--            从剪切板导入fetch api-->
+<!--          </n-button>-->
+<!--        </n-space>-->
+<!--      </n-collapse-item>-->
+<!--    </n-collapse>-->
 
+    <!--  请求url-->
     <n-input-group>
-      <n-select
-          v-model:value="request.method"
-          :options="methodOptions"
-          style="width: 120px"
-      />
-      <n-input
-          v-model:value="request.url"
-          placeholder="请输入接口地址 (https://...)"
-          style="flex: 1"
-      />
-      <n-button type="primary" @click="sendRequest" :loading="loading">
-        发送请求
-      </n-button>
+      <n-select v-model:value="request.method" :options="methodOptions" style="width: 94px"/>
+      <n-input v-model:value="request.url" placeholder="请输入接口地址 (https://...)" style="flex: 1"/>
+      <n-button type="primary" @click="sendRequest" :loading="loading">发送</n-button>
     </n-input-group>
 
+    <!--  请求参数  -->
     <n-tabs type="line" animated style="margin-top: 15px">
       <n-tab-pane name="params" tab="Params (Query)">
-        <n-dynamic-input
-            v-model:value="request.queryParams"
-            preset="pair"
-            key-placeholder="Key"
-            value-placeholder="Value"
-        />
+        <n-dynamic-input v-model:value="request.queryParams"
+                         preset="pair" key-placeholder="Key" value-placeholder="Value">
+          <template #action="{ index, create, remove }">
+            <n-button @click="() => create(index)">
+              <n-icon>
+                <Add/>
+              </n-icon>
+            </n-button>
+            <n-button @click="() => remove(index)">
+              <n-icon>
+                <Remove/>
+              </n-icon>
+            </n-button>
+          </template>
+        </n-dynamic-input>
       </n-tab-pane>
 
       <n-tab-pane name="headers" tab="Headers">
-        <n-dynamic-input
-            v-model:value="request.headers"
-            preset="pair"
-            key-placeholder="Key"
-            value-placeholder="Value"
-        />
+        <n-dynamic-input v-model:value="request.headers"
+                         preset="pair"
+                         key-placeholder="Key"
+                         value-placeholder="Value"/>
       </n-tab-pane>
 
       <n-tab-pane name="body" tab="Body">
@@ -61,22 +60,20 @@
           </n-space>
         </n-radio-group>
         <div style="margin-top: 10px" v-if="request.bodyType !== 'none'">
-          <n-input
-              v-model:value="request.bodyContent"
-              type="textarea"
-              placeholder="输入请求体内容"
-              :autosize="{ minRows: 5, maxRows: 15 }"
-              style="font-family: monospace"
-          />
+          <n-input v-model:value="request.bodyContent"
+                   type="textarea"
+                   placeholder="输入请求体内容"
+                   :autosize="{ minRows: 5, maxRows: 15 }"
+                   style="font-family: monospace"/>
           <n-button size="tiny" style="margin-top:5px" @click="formatBodyJson" v-if="request.bodyType === 'json'">
             格式化 JSON
           </n-button>
         </div>
       </n-tab-pane>
     </n-tabs>
-
     <n-divider/>
 
+    <!--  请求响应  -->
     <div v-if="response.status !== 0">
       <n-space align="center" style="margin-bottom: 10px">
         <n-tag :type="response.ok ? 'success' : 'error'">
@@ -87,12 +84,10 @@
 
       <n-tabs type="segment">
         <n-tab-pane name="preview" tab="Response Body">
-          <n-code
-              :code="response.data"
-              language="json"
-              word-wrap
-              style="max-height: 500px; overflow: auto; background: #f5f5f5; padding: 10px; border-radius: 4px;"
-          />
+          <n-code :code="response.data"
+                  language="json"
+                  word-wrap
+                  style="max-height: 500px; overflow: auto; background: #f5f5f5; padding: 10px; border-radius: 4px;"/>
         </n-tab-pane>
         <n-tab-pane name="resHeaders" tab="Response Headers">
           <n-table size="small" striped>
@@ -119,6 +114,7 @@
 <script setup lang="ts">
 import {reactive, ref} from 'vue';
 import {useMessage} from 'naive-ui';
+import {Add, Remove} from '@vicons/ionicons5'
 
 // --- 类型定义 ---
 interface KeyValue {
@@ -177,102 +173,20 @@ const response = reactive<ResponseState>({
   time: 0
 });
 
-// --- 核心逻辑 1: 导入 Fetch 代码 ---
-// const handleImport2 = () => {
-//   const code = importCode.value.trim();
-//   if (!code) {
-//     message.warning('请先粘贴 fetch 代码');
-//     return;
-//   }
-//
-//   try {
-//     // 1. 提取 URL
-//     // 正则匹配 fetch("url", ...) 或 fetch('url', ...)
-//     const urlMatch = code.match(/fetch\s*\(\s*(["'`])(.*?)\1/);
-//     if (!urlMatch) {
-//       throw new Error('未找到有效的 fetch URL');
-//     }
-//     let rawUrl = urlMatch[2] || '';
-//
-//     // 2. 提取 Options 对象
-//     // 我们通过正则截取第二个参数的大括号部分，然后使用 new Function 解析为对象
-//     // 注意：这需要代码格式相对标准，Chrome复制出来的通常是标准的
-//     const optionsMatch = code.match(/fetch\s*\(.*,\s*({[\s\S]*})\s*\);?/);
-//
-//     let options: any = {};
-//     if (optionsMatch) {
-//       try {
-//         // ⚠️ 安全警告：在生产环境解析任意 JS 代码有风险。
-//         // 这里假设是开发者工具，解析的是配置对象。
-//         // 将对象字符串包装在 return 中执行
-//         const func = new Function('return ' + optionsMatch[1]);
-//         options = func();
-//       } catch (e) {
-//         console.error('Options parse error', e);
-//         message.error('Fetch 配置项解析失败，请检查格式');
-//         return;
-//       }
-//     }
-//
-//     // --- 填充状态 ---
-//
-//     // A. 处理 URL 和 Query Params
-//     // 如果原 URL 包含参数，需要分离出来填入 params 列表，并保持 URL 干净（或者你也可以选择保留在 URL 里）
-//     const urlObj = new URL(rawUrl);
-//     request.url = urlObj.origin + urlObj.pathname; // 只保留基础路径
-//
-//     const newParams: KeyValue[] = [];
-//     urlObj.searchParams.forEach((value, key) => {
-//       newParams.push({key, value});
-//     });
-//     request.queryParams = newParams;
-//
-//     // B. Method
-//     request.method = (options.method || 'GET').toUpperCase();
-//
-//     // C. Headers
-//     const newHeaders: KeyValue[] = [];
-//     if (options.headers) {
-//       for (const [key, value] of Object.entries(options.headers)) {
-//         newHeaders.push({key, value: String(value)});
-//       }
-//     }
-//     request.headers = newHeaders;
-//
-//     // D. Body
-//     if (options.body) {
-//       let bodyStr = options.body;
-//       // fetch 中的 body通常是字符串化的 JSON
-//       // 尝试判断是否是 JSON
-//       try {
-//         const parsed = JSON.parse(bodyStr);
-//         // 如果是对象，则格式化显示
-//         if (typeof parsed === 'object') {
-//           request.bodyType = 'json';
-//           request.bodyContent = JSON.stringify(parsed, null, 2);
-//         } else {
-//           request.bodyType = 'text';
-//           request.bodyContent = bodyStr;
-//         }
-//       } catch (e) {
-//         // 不是 JSON，当作普通文本
-//         request.bodyType = 'text';
-//         request.bodyContent = bodyStr;
-//       }
-//     } else {
-//       request.bodyType = 'none';
-//       request.bodyContent = '';
-//     }
-//
-//     message.success('导入成功！');
-//
-//   } catch (e: any) {
-//     console.error(e);
-//     message.error(`导入失败: ${e.message}`);
-//   }
-// };
-const handleImport = () => {
-  const code = importCode.value.trim();
+async function getClipboardContent(): Promise<string | null> {
+  try {
+    const text = await navigator.clipboard.readText();
+    console.log('剪贴板内容:', text);
+    return text;
+  } catch (err) {
+    console.error('无法读取剪贴板:', err);
+    return null;
+  }
+}
+
+const handleImport = async () => {
+  // const code = importCode.value.trim();
+  const code = await getClipboardContent()
   if (!code) {
     message.warning('请先粘贴 fetch 代码');
     return;
@@ -335,7 +249,7 @@ const handleImport = () => {
 
     const newParams: KeyValue[] = [];
     urlObj.searchParams.forEach((value, key) => {
-      newParams.push({ key, value });
+      newParams.push({key, value});
     });
     request.queryParams = newParams;
 
@@ -346,7 +260,7 @@ const handleImport = () => {
     const newHeaders: KeyValue[] = [];
     if (options.headers) {
       for (const [key, value] of Object.entries(options.headers)) {
-        newHeaders.push({ key, value: String(value) });
+        newHeaders.push({key, value: String(value)});
       }
     }
     request.headers = newHeaders;
