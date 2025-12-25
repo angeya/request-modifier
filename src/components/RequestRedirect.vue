@@ -95,12 +95,15 @@ function removeRule(id: number): void {
 
 <template>
   <div class="card" style="width: 480px">
-    <n-form-item label="待测试URL" path="url">
-      <n-input v-model:value="ruleTest.url" placeholder="请输入URL(可输入部分内容)"/>
-    </n-form-item>
-    <n-form-item label="重定向结果" path="result">
-      <n-input v-model:value="ruleTest.result" disabled placeholder=""/>
-    </n-form-item>
+    <n-form label-placement="left" size="small" class="test-form" :show-feedback="false">
+      <n-form-item label="待测试URL" path="url">
+        <n-input v-model:value="ruleTest.url" size="small" placeholder="请输入URL(可输入部分内容)"/>
+      </n-form-item>
+      <n-form-item label="重定向结果" path="result">
+        <n-input v-model:value="ruleTest.result" size="small" disabled placeholder=""/>
+      </n-form-item>
+    </n-form>
+
   </div>
 
   <h4>规则列表</h4>
@@ -120,5 +123,7 @@ function removeRule(id: number): void {
 </template>
 
 <style scoped>
-
+.test-form :deep(.n-form-item) {
+  margin-bottom: 4px; /* 默认大概 16~24px */
+}
 </style>
