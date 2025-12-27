@@ -4,9 +4,6 @@ import HeaderModify from "./components/HeaderModify.vue";
 import ApiRequest from "./components/ApiRequest.vue";
 import {onMounted, ref} from "vue";
 import {disablePlugin, enablePlugin, getPluginStatus} from "./api/chromeApi.ts";
-// import {useMessage} from 'naive-ui'
-
-// const message = useMessage()
 
 const pluginStatus = ref(true)
 
@@ -31,16 +28,16 @@ function disable() {
 <template>
   <div style="display: flex; align-items: center;">
     <h3 style="color: #242424">请求修改器</h3>
-    <n-button style="margin-left: 20px" v-show="pluginStatus" type="success" ghost @click="disable">
+    <n-button style="margin-left: 20px" quaternary v-show="pluginStatus" ghost @click="disable">
       <img src="./assets/power-on.svg" alt="">
     </n-button>
-    <n-button style="margin-left: 20px" v-show="!pluginStatus" @click="enable">
+    <n-button style="margin-left: 20px" quaternary v-show="!pluginStatus" ghost @click="enable">
       <img src="./assets/power-off.svg" alt="">
     </n-button>
     <p v-show="pluginStatus" style="margin-left: 8px; color: #18a058; font-weight: bolder">努力工作中...</p>
     <p v-show="!pluginStatus" style="margin-left: 8px; color: #515151; font-weight: bolder">安心休息中...</p>
-    <img v-show="pluginStatus" style="height: 32px; width: 32px; margin-left: auto" src="./assets/cat-work.gif" alt="">
-    <img v-show="!pluginStatus" style="height: 32px; width: 32px; margin-left: auto" src="./assets/cat-sleep.gif"
+    <img v-show="pluginStatus" style="height: 36px; width: 36px; margin-left: auto" src="./assets/work.gif" alt="">
+    <img v-show="!pluginStatus" style="height: 30px; width: 30px; margin-left: auto" src="./assets/sleep.gif"
          alt="">
   </div>
 

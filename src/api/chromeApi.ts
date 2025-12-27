@@ -59,7 +59,25 @@ export function getStorage(keys: string[]): Promise<Record<string, any>> {
 }
 
 /**
- * 禁用插件
+ * 获取测试URL
+ */
+export async function getTestUrl(): Promise<string> {
+    const data = await getStorage(['testUrl']);
+    console.log('读取：' + data)
+    return data.testUrl || '';
+}
+
+/**
+ * 保存测试URL
+ * @param testUrl 测试URL
+ */
+export async function saveTestUrl(testUrl: string): Promise<void> {
+    await chrome.storage.sync.set({'testUrl': testUrl})
+}
+
+
+/**
+ * 获取插件状态
  */
 export async function getPluginStatus(): Promise<boolean> {
     const data = await getStorage(['enabledPlugin']);

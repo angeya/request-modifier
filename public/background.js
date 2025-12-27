@@ -96,7 +96,7 @@
 
 chrome.runtime.onStartup.addListener(() => {
     console.log('浏览器已启动，扩展正在运行');
-    chrome.storage.sync.get(['pluginStatus'], (data) => {
+    chrome.storage.sync.get(['enabledPlugin'], (data) => {
         const enabled = data.enabled === undefined ? false : data.enabled;
         chrome.action.setIcon({
             path: enabled ? "icon_enabled.png" : "icon_disabled.png"

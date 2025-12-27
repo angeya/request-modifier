@@ -1,26 +1,9 @@
 <template>
-  <n-card style="max-width: 1200px">
-    <n-button type="primary" secondary @click="handleImport">
-      从剪切板导入fetch api
-    </n-button>
-<!--    <n-collapse style="margin-bottom: 20px">-->
-<!--      <n-collapse-item title="📥 导入 Fetch 代码 (支持 DevTools Copy as fetch)" name="1">-->
-<!--        <n-input v-model:value="importCode"-->
-<!--                 type="textarea"-->
-<!--                 placeholder="在此粘贴 fetch(...) 代码"-->
-<!--                 :autosize="{ minRows: 3, maxRows: 10 }"/>-->
-<!--        <n-space style="margin-top: 10px" justify="end">-->
-<!--          <n-button type="primary" secondary @click="handleImport">-->
-<!--            从剪切板导入fetch api-->
-<!--          </n-button>-->
-<!--        </n-space>-->
-<!--      </n-collapse-item>-->
-<!--    </n-collapse>-->
-
+  <n-card style="max-width: 1200px" class="card">
     <!--  请求url-->
     <n-input-group>
       <n-select v-model:value="request.method" :options="methodOptions" style="width: 94px"/>
-      <n-input v-model:value="request.url" placeholder="请输入接口地址 (https://...)" style="flex: 1"/>
+      <n-input v-model:value="request.url" @change="tryImportFetchApi" placeholder="请输入接口地址 (https://...)" style="flex: 1"/>
       <n-button type="primary" @click="sendRequest" :loading="loading">发送</n-button>
     </n-input-group>
 
@@ -143,7 +126,6 @@ interface ResponseState {
 // --- 状态 ---
 const message = useMessage();
 const loading = ref(false);
-const importCode = ref('');
 
 const methodOptions = [
   {label: 'GET', value: 'GET'},
@@ -173,28 +155,21 @@ const response = reactive<ResponseState>({
   time: 0
 });
 
-async function getClipboardContent(): Promise<string | null> {
-  try {
-    const text = await navigator.clipboard.readText();
-    console.log('剪贴板内容:', text);
-    return text;
-  } catch (err) {
-    console.error('无法读取剪贴板:', err);
-    return null;
+const tryImportFetchApi = (value: string) => {
+  if (value && value.trim().startsWith('fetch(')) {
+    handleImport(value)
   }
 }
 
-const handleImport = async () => {
-  // const code = importCode.value.trim();
-  const code = await getClipboardContent()
-  if (!code) {
-    message.warning('请先粘贴 fetch 代码');
+const handleImport = async (fetchApiContent:String) => {
+  if (!fetchApiContent) {
+    message.warning('请先粘贴 fetch 代码' + fetchApiContent);
     return;
   }
 
   try {
     // 1. 提取 URL
-    const urlMatch = code.match(/fetch\s*\(\s*(["'`])(.*?)\1/);
+    const urlMatch = fetchApiContent.match(/fetch\s*\(\s*(["'`])(.*?)\1/);
     if (!urlMatch) {
       throw new Error('未找到有效的 fetch URL');
     }
@@ -203,7 +178,7 @@ const handleImport = async () => {
 
     // 2. 提取 Options 对象字符串
     // 匹配第二个参数：fetch("url", { ... }) 中的 { ... }
-    const optionsMatch = code.match(/fetch\s*\(.*,\s*({[\s\S]*})\s*\);?/);
+    const optionsMatch = fetchApiContent.match(/fetch\s*\(.*,\s*({[\s\S]*})\s*\);?/);
 
     let options: any = {};
     if (optionsMatch) {
