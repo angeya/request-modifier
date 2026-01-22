@@ -1,4 +1,4 @@
-import type {Rule} from '../types'
+import type {Rule, HeaderRule} from '../types'
 
 /**
  * Chrome 声明式网络请求规则
@@ -26,23 +26,44 @@ interface DeclarativeRule {
 }
 
 /**
- * 加载配置并渲染界面
+ * 加载重定向规则列表
  */
 export async function loadRuleList(): Promise<Rule[]> {
-    const data = await getStorage(['ruleList', 'enabled', 'testUrl']);
-    console.log('读取：' + data)
+    const data = await getStorage(['ruleList']);
+    console.log('读取重定向规则：' + JSON.stringify(data))
     const ruleList: Rule[] = data.ruleList || [];
     return ruleList
 }
 
 /**
- * 规则列表持久化
+ * 加载请求头修改规则列表
+ */
+export async function loadHeaderRuleList(): Promise<HeaderRule[]> {
+    const data = await getStorage(['headerRuleList']);
+    console.log('读取请求头规则：' + JSON.stringify(data))
+    const headerRuleList: HeaderRule[] = data.headerRuleList || [];
+    return headerRuleList
+}
+
+/**
+ * 重定向规则列表持久化
  * @param ruleList 规则列表
  */
 export async function saveRuleList(ruleList: Rule[]): Promise<void> {
-    console.log('保存规则' + ruleList.toString())
+    console.log('保存重定向规则' + JSON.stringify(ruleList))
     await chrome.storage.sync.set({'ruleList': ruleList})
     await updateDynamicRules(ruleList)
+}
+
+/**
+ * 请求头规则列表持久化
+ * @param headerRuleList 请求头规则列表
+ */
+export async function saveHeaderRuleList(headerRuleList: HeaderRule[]): Promise<void> {
+    console.log('保存请求头规则' + JSON.stringify(headerRuleList))
+    await chrome.storage.sync.set({'headerRuleList': headerRuleList})
+    const ruleList: Rule[] = await loadRuleList()
+    await updateDynamicRules(ruleList, headerRuleList)
 }
 
 export function getStorage(keys: string[]): Promise<Record<string, any>> {
@@ -105,50 +126,113 @@ export async function disablePlugin(): Promise<void> {
  */
 export async function enablePlugin(): Promise<void> {
     const ruleList: Rule[] = await loadRuleList()
+    const headerRuleList: HeaderRule[] = await loadHeaderRuleList()
     await chrome.storage.sync.set({'enabledPlugin': true})
-    await updateDynamicRules(ruleList)
+    await updateDynamicRules(ruleList, headerRuleList)
     updateIcon(true)
 }
 
 /**
  * 更新声明性网络请求规则
- * @param ruleList 规则列表
+ * @param ruleList 重定向规则列表
+ * @param headerRuleList 请求头规则列表
  */
-export async function updateDynamicRules(ruleList: Rule[]): Promise<void> {
-    console.log('更新规则' + ruleList.toString())
-    const declarativeRules: DeclarativeRule[] = ruleList
-        .map((rule): DeclarativeRule | null => {
-            const isValid = rule.enabled && rule.match && rule.replace;
-            if (!isValid) {
-                return null;
-            }
-            try {
-                return {
-                    id: rule.id,
-                    priority: 1,
-                    action: {
-                        type: 'redirect',
-                        redirect: {
-                            regexSubstitution: rule.replace
+export async function updateDynamicRules(ruleList?: Rule[], headerRuleList?: HeaderRule[]): Promise<void> {
+    // 获取所有当前规则，用于后续删除
+    const currentRules = await chrome.declarativeNetRequest.getDynamicRules();
+    const allRuleIds = currentRules.map(rule => rule.id);
+    
+    // 构建所有规则
+    const allDeclarativeRules: DeclarativeRule[] = [];
+    
+    // 处理重定向规则
+    if (ruleList) {
+        console.log('更新重定向规则' + JSON.stringify(ruleList))
+        const redirectRules = ruleList
+            .map((rule): DeclarativeRule | null => {
+                const isValid = rule.enabled && rule.match && rule.replace;
+                if (!isValid) {
+                    return null;
+                }
+                try {
+                    return {
+                        id: rule.id,
+                        priority: 1,
+                        action: {
+                            type: 'redirect',
+                            redirect: {
+                                regexSubstitution: rule.replace
+                            }
+                        },
+                        condition: {
+                            regexFilter: rule.match,
+                            resourceTypes: ['main_frame', 'sub_frame', 'xmlhttprequest', 'websocket',
+                                'media', 'image', 'stylesheet','object','font','webtransport','ping','other'],
+                            excludedRequestDomains: [],
+                            isUrlFilterCaseSensitive: false
                         }
-                    },
-                    condition: {
-                        regexFilter: rule.match,
-                        resourceTypes: ['main_frame', 'sub_frame', 'xmlhttprequest', 'websocket',
-                            'media', 'image', 'stylesheet','object','font','webtransport','ping','other'],
-                        excludedRequestDomains: [],
-                        isUrlFilterCaseSensitive: false
-                    }
-                };
-            } catch (e) {
-                console.error(`规则 ${rule.match} 无效:`, e);
-                return null;
-            }
-        })
-        .filter((rule): rule is DeclarativeRule => rule !== null); // 类型守卫
+                    };
+                } catch (e) {
+                    console.error(`重定向规则 ${rule.match} 无效:`, e);
+                    return null;
+                }
+            })
+            .filter((rule): rule is DeclarativeRule => rule !== null); // 类型守卫
+        
+        allDeclarativeRules.push(...redirectRules);
+    }
+    
+    // 处理请求头修改规则
+    if (headerRuleList) {
+        console.log('更新请求头规则' + JSON.stringify(headerRuleList))
+        const headerRules = headerRuleList
+            .map((rule): DeclarativeRule | null => {
+                const isValid = rule.enabled && rule.headerName;
+                if (!isValid) {
+                    return null;
+                }
+                try {
+                    // 根据规则类型构建不同的动作
+                    const action: chrome.declarativeNetRequest.RuleAction = {
+                        type: 'modifyHeaders',
+                        requestHeaders: rule.type === 'request' ? [{
+                            header: rule.headerName,
+                            operation: rule.headerValue === '' ? 'remove' : 'set',
+                            value: rule.headerValue
+                        }] : undefined,
+                        responseHeaders: rule.type === 'response' ? [{
+                            header: rule.headerName,
+                            operation: rule.headerValue === '' ? 'remove' : 'set',
+                            value: rule.headerValue
+                        }] : undefined
+                    };
+                    
+                    return {
+                        id: rule.id + 10000, // 避免ID冲突，请求头规则使用10000以上的ID
+                        priority: 1,
+                        action,
+                        condition: {
+                            regexFilter: rule.match || '.*', // 为空时匹配所有请求
+                            resourceTypes: ['main_frame', 'sub_frame', 'xmlhttprequest', 'websocket',
+                                'media', 'image', 'stylesheet','object','font','webtransport','ping','other'],
+                            excludedRequestDomains: [],
+                            isUrlFilterCaseSensitive: false
+                        }
+                    };
+                } catch (e) {
+                    console.error(`请求头规则 ${rule.match} 无效:`, e);
+                    return null;
+                }
+            })
+            .filter((rule): rule is DeclarativeRule => rule !== null); // 类型守卫
+        
+        allDeclarativeRules.push(...headerRules);
+    }
+    
+    // 更新规则
     await chrome.declarativeNetRequest.updateDynamicRules({
-        removeRuleIds: ruleList.map((rule) => rule.id),
-        addRules: declarativeRules
+        removeRuleIds: allRuleIds,
+        addRules: allDeclarativeRules
     });
 
     if (chrome.runtime.lastError) {
