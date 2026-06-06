@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>请求修改器 - 使用说明</title>
+  <style>
+    body {
+      width: 100%;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background-color: #f5f5f5;
+    }
+  </style>
+  <script type="module" crossorigin src="./help.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/index-BnrfXcHS.js">
+  <link rel="stylesheet" crossorigin href="./assets/index-BpKyEwd_.css">
+  <link rel="stylesheet" crossorigin href="./assets/help-D4o52qeZ.css">
+</head>
+<body>
+  <div id="app"></div>
+  <!-- 如果模块加载失败，使用构建后的文件 -->
+  <script>
+    // 检查模块是否加载成功，如果没有则加载构建后的文件
+    window.addEventListener('error', function(e) {
+      if (e.filename && e.filename.includes('help.ts')) {
+        // 加载构建后的主文件，它应该包含了HelpPage组件
+        const script = document.createElement('script');
+        script.src = './assets/index-CwIOCLa-.js'; // 这是构建后的文件名，可能需要根据实际情况调整
+        document.head.appendChild(script);
+      }
+    }, true);
+  </script>
+</body>
+</html>

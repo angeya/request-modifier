@@ -1,11 +1,9 @@
 import {createApp} from 'vue'
 import './style.css'
 import App from './App.vue'
-import naive from 'naive-ui'
-// import { setupNaiveDiscreteApi } from 'naive-ui'
-
-// setupNaiveDiscreteApi() // 👈 必须调用一次
+import ElementPlus from 'element-plus'
+import 'element-plus/dist/index.css'
 
 const app = createApp(App)
-app.use(naive)
+app.use(ElementPlus)
 app.mount('#app')

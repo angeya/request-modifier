@@ -1,29 +1,29 @@
 <template>
-  <h4>header修改规则</h4>
-  <div v-for="(rule, index) in headerRuleListRef" :key="index" class="card" 
-       style="width: 480px; margin: 14px 0; display: flex; flex-direction: column; gap: 10px; padding: 10px; border: 1px solid #e0e0e0; border-radius: 6px;">
+  <div class="section-header">
+    <h4 class="section-title">规则列表</h4>
+    <el-button type="primary" @click="addRule" size="small">添加规则</el-button>
+  </div>
+  <div v-for="(rule, index) in headerRuleListRef" :key="index" class="rule-card card">
     <!-- 第一行：URL匹配、启用开关和操作按钮 -->
-    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-      <n-input type="text" class="rule-input" v-model:value="rule.match" :disabled="!rule.isEditing" 
-               placeholder="匹配URL，支持正则" style="flex: 1;"></n-input>
-      <n-switch v-model:value="rule.enabled" @update:value="doSaveRule()"></n-switch>
-      <div style="margin-left: auto; display: flex; gap: 5px;">
-        <n-button v-show="rule.isEditing" type="success" size="small" @click="saveRule(rule)">保存</n-button>
-        <n-button v-show="!rule.isEditing" type="warning" size="small" @click="rule.isEditing=true">编辑</n-button>
-        <n-button type="error" size="small" @click="removeRule(rule.id)">删除</n-button>
+    <div class="rule-row">
+      <el-input class="rule-input" v-model="rule.match" :disabled="!rule.isEditing" 
+               placeholder="匹配URL，支持正则" size="small"></el-input>
+      <el-switch v-model="rule.enabled" @change="doSaveRule()" size="small"></el-switch>
+      <div class="rule-actions">
+        <el-button :type="rule.isEditing ? 'success' : 'primary'" :plain="!rule.isEditing" size="small" @click="rule.isEditing ? saveRule(rule) : (rule.isEditing = true)">{{ rule.isEditing ? '保存' : '编辑' }}</el-button>
+        <el-button type="danger" size="small" plain @click="removeRule(rule.id)">删除</el-button>
       </div>
     </div>
     <!-- 第二行：类型、请求头/响应头名称和值 -->
-    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-      <n-select v-model:value="rule.type" :disabled="!rule.isEditing" :options="headerTypeOptions" style="width: 100px;" transfer popper-placement="bottom-start"></n-select>
-      <n-input type="text" class="rule-input" v-model:value="rule.headerName" :disabled="!rule.isEditing" 
-               :placeholder="rule.type === 'request' ? '请求头名称' : '响应头名称'" style="flex: 1; min-width: 150px;"></n-input>
-      <n-input type="text" class="rule-input" v-model:value="rule.headerValue" :disabled="!rule.isEditing" 
-               :placeholder="rule.type === 'request' ? '请求头值，空值表示删除' : '响应头值，空值表示删除'" style="flex: 1; min-width: 150px;"></n-input>
+    <div class="rule-row" style="margin-top: 8px;">
+      <el-select v-model="rule.type" :disabled="!rule.isEditing" style="width: 90px; flex-shrink: 0;" placeholder="类型" size="small">
+        <el-option v-for="opt in headerTypeOptions" :key="opt.value" :label="opt.label" :value="opt.value"/>
+      </el-select>
+      <el-input class="rule-input" v-model="rule.headerName" :disabled="!rule.isEditing" 
+               :placeholder="rule.type === 'request' ? '请求头名称' : '响应头名称'" size="small"></el-input>
+      <el-input class="rule-input" v-model="rule.headerValue" :disabled="!rule.isEditing" 
+               :placeholder="rule.type === 'request' ? '请求头值，空值表示删除' : '响应头值，空值表示删除'" size="small"></el-input>
     </div>
-  </div>
-  <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
-    <n-button type="info" @click="addRule" size="small">添加规则</n-button>
   </div>
 </template>
 
@@ -98,12 +98,43 @@ function removeRule(id: number): void {
 </script>
 
 <style scoped>
-.rule-input {
-  flex: 1;
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 10px 0;
 }
 
-.info {
+.section-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #303133;
+}
+
+.rule-card {
+  margin-bottom: 8px;
+}
+
+.rule-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.rule-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.rule-actions {
+  display: flex;
+  gap: 0;
+  flex-shrink: 0;
+}
+
+.rule-actions :deep(.el-button) {
+  padding: 5px 6px;
   font-size: 12px;
-  color: #666;
 }
 </style>

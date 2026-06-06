@@ -6,11 +6,11 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc -b && vite build",
+    "watch": "set NODE_ENV=development&& vite build --watch",
     "preview": "vite preview"
   },
   "dependencies": {
-    "@vicons/ionicons5": "^0.13.0",
-    "naive-ui": "^2.43.1",
+    "element-plus": "^2.14.1",
     "vue": "^3.5.22"
   },
   "devDependencies": {
@@ -18,6 +18,7 @@
     "@types/node": "^24.6.0",
     "@vitejs/plugin-vue": "^6.0.1",
     "@vue/tsconfig": "^0.8.1",
+    "hot-reload-extension-vite": "^1.1.0",
     "typescript": "~5.9.3",
     "vite": "^7.1.7",
     "vue-tsc": "^3.1.0"

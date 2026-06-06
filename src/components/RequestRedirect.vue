@@ -1,28 +1,32 @@
 <template>
-  <div class="card" style="width: 480px">
-    <n-form label-placement="left" size="small" class="test-form" :show-feedback="false">
-      <n-form-item label="待测试URL" path="url">
-        <n-input v-model:value="testUrlRef.url" @update:value="saveAndUpdateUrlTestResult" size="small" placeholder="请输入URL(可输入部分内容)"/>
-      </n-form-item>
-      <n-form-item label="重定向结果" path="result">
-        <n-input v-model:value="testUrlRef.result" size="small" disabled placeholder=""/>
-      </n-form-item>
-    </n-form>
+  <div class="test-section card">
+    <el-form label-width="80px" size="small" class="test-form">
+      <el-form-item label="待测试URL">
+        <el-input v-model="testUrlRef.url" @input="saveAndUpdateUrlTestResult" size="small" placeholder="请输入URL(可输入部分内容)"/>
+      </el-form-item>
+      <el-form-item label="重定向结果">
+        <el-input v-model="testUrlRef.result" size="small" disabled placeholder=""/>
+      </el-form-item>
+    </el-form>
   </div>
 
-  <h4>规则列表</h4>
-  <div v-for="(rule, index) in ruleListRef" :key="index" class="card"
-       style="width: 480px; margin: 14px 0; display: flex; gap: 10px; align-items: center;">
-    <n-input type="text" class="rule-input" v-model:value="rule.match" :disabled="!rule.isEditing"
-             placeholder="匹配值，支持正则"/>
-    <n-input type="text" class="rule-input" v-model:value="rule.replace" :disabled="!rule.isEditing"
-             placeholder="替换值"/>
-    <n-switch v-model:value="rule.enabled" @update:value="doSaveRule()"/>
-    <n-button v-show="rule.isEditing" type="success" size="small" @click="saveRule(rule)">保存</n-button>
-    <n-button v-show="!rule.isEditing" type="warning" size="small" @click="rule.isEditing=true">编辑</n-button>
-    <n-button type="error" size="small" @click="removeRule(rule.id)">删除</n-button>
+  <div class="section-header">
+    <h4 class="section-title">规则列表</h4>
+    <el-button type="primary" @click="addRule" size="small">添加规则</el-button>
   </div>
-  <n-button type="info" @click="addRule" size="small">添加规则</n-button>
+  <div v-for="(rule, index) in ruleListRef" :key="index" class="rule-card card">
+    <div class="rule-row">
+      <el-input class="rule-input" v-model="rule.match" :disabled="!rule.isEditing"
+             placeholder="匹配值，支持正则" size="small"/>
+      <el-input class="rule-input" v-model="rule.replace" :disabled="!rule.isEditing"
+             placeholder="替换值" size="small"/>
+      <el-switch v-model="rule.enabled" @change="doSaveRule()" size="small"/>
+      <div class="rule-actions">
+        <el-button :type="rule.isEditing ? 'success' : 'primary'" :plain="!rule.isEditing" size="small" @click="rule.isEditing ? saveRule(rule) : (rule.isEditing = true)">{{ rule.isEditing ? '保存' : '编辑' }}</el-button>
+        <el-button type="danger" size="small" plain @click="removeRule(rule.id)">删除</el-button>
+      </div>
+    </div>
+  </div>
 
 </template>
 
@@ -140,7 +144,51 @@ function updateUrlTestResult(): void {
 </script>
 
 <style scoped>
-.test-form :deep(.n-form-item) {
-  margin-bottom: 4px; /* 默认大概 16~24px */
+.test-section {
+  margin-bottom: 12px;
+}
+
+.test-form :deep(.el-form-item) {
+  margin-bottom: 6px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 10px 0;
+}
+
+.section-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #303133;
+}
+
+.rule-card {
+  margin-bottom: 8px;
+}
+
+.rule-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.rule-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.rule-actions {
+  display: flex;
+  gap: 0;
+  flex-shrink: 0;
+}
+
+.rule-actions :deep(.el-button) {
+  padding: 5px 6px;
+  font-size: 12px;
 }
 </style>

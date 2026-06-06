@@ -1,13 +1,27 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import hotReloadExtension from 'hot-reload-extension-vite'
 
-// https://vite.dev/config/
 export default defineConfig({
-  base: './', // 👈 关键配置：使用相对路径
-  plugins: [vue()],
+  base: './',
+  plugins: [
+    vue(),
+    hotReloadExtension({
+      log: true,
+      backgroundPath: 'src/service-worker/background.ts'
+    })
+  ],
   build: {
     rollupOptions: {
-      external: ['chrome'], // 👈 告诉 Rollup chrome是外部依赖，不要打包 chrome
+      external: ['chrome'],
+      input: {
+        main: 'index.html',
+        help: 'help.html',
+        background: 'src/service-worker/background.ts'
+      },
+      output: {
+        entryFileNames: '[name].js'
+      }
     },
   },
 })
