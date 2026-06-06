@@ -92,6 +92,11 @@ function closePage() {
 </script>
 
 <style>
+html {
+  overflow: auto !important;
+  height: auto !important;
+}
+
 body {
   width: 100% !important;
   height: auto !important;
