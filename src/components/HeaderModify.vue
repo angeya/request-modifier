@@ -20,9 +20,9 @@
         <el-option v-for="opt in headerTypeOptions" :key="opt.value" :label="opt.label" :value="opt.value" :disabled="opt.disabled"/>
       </el-select>
       <el-input class="rule-input" v-model="rule.headerName" :disabled="!rule.isEditing" 
-               :placeholder="rule.type === 'request' ? '请求头名称' : '响应头名称'" size="small"></el-input>
+               :placeholder="rule.isEditing ? (rule.type === 'request' ? '请求头参数名' : '响应头参数名') : ''" size="small"></el-input>
       <el-input class="rule-input" v-model="rule.headerValue" :disabled="!rule.isEditing" 
-               :placeholder="rule.type === 'request' ? '请求头值，空值表示删除' : '响应头值，空值表示删除'" size="small"></el-input>
+               :placeholder="rule.isEditing ? (rule.type === 'request' ? '请求头参数值' : '响应头参数值') : ''" size="small"></el-input>
     </div>
   </div>
 </template>
