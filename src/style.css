@@ -1,4 +1,28 @@
 :root {
+    --neu-bg: #f0f2f5;
+    --neu-bg-card: #f5f7fa;
+    --neu-shadow-light: rgba(255, 255, 255, 0.8);
+    --neu-shadow-dark: rgba(163, 177, 198, 0.35);
+    --neu-text-primary: #2c3e50;
+    --neu-text-secondary: #606266;
+    --neu-text-muted: #b0b4bb;
+    --neu-accent: #6c5ce7;
+    --neu-accent-light: #8577ed;
+    --neu-success: #36d399;
+    --neu-danger: #f06868;
+    --neu-warning: #f5c542;
+    --neu-radius: 14px;
+    --neu-radius-sm: 10px;
+
+    /* 覆盖 Element Plus 默认主题色为紫色 */
+    --el-color-primary: #6c5ce7;
+    --el-color-primary-light-3: #8577ed;
+    --el-color-primary-light-5: #a594f0;
+    --el-color-primary-light-7: #c5b5f5;
+    --el-color-primary-light-8: #d5c8f8;
+    --el-color-primary-light-9: #e5dbfa;
+    --el-color-primary-dark-2: #5649c9;
+
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     line-height: 1.5;
     font-weight: 400;
@@ -6,7 +30,7 @@
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    color: #303133;
+    color: var(--neu-text-primary);
 }
 
 * {
@@ -19,21 +43,33 @@ html {
 
 body {
     margin: 0;
-    background-color: #f5f7fa;
-    padding: 12px;
+    background-color: var(--neu-bg);
+    padding: 14px;
     height: 600px;
     width: 500px;
     overflow: hidden;
     box-sizing: border-box;
 }
 
+/* 轻拟态凸起卡片 */
 .card {
-    margin: 4px;
+    margin: 0;
     padding: 12px;
-    background-color: #fff;
-    border: 1px solid #c1c4ca;
-    border-radius: 6px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    background-color: var(--neu-bg-card);
+    border: none;
+    border-radius: var(--neu-radius-sm);
+    box-shadow: 3px 3px 8px var(--neu-shadow-dark),
+                -3px -3px 8px var(--neu-shadow-light);
+    overflow: hidden;
+}
+
+/* 轻拟态凹陷区域 */
+.neu-inset {
+    background-color: var(--neu-bg);
+    border: none;
+    border-radius: var(--neu-radius-sm);
+    box-shadow: inset 2px 2px 5px var(--neu-shadow-dark),
+                inset -2px -2px 5px var(--neu-shadow-light);
 }
 
 #app {
@@ -42,11 +78,336 @@ body {
     overflow: hidden;
 }
 
-/* ElMessage 从右下角弹出 */
+/* ========== Element Plus 组件轻拟态覆盖 ========== */
+
+/* 输入框轻拟态凹陷 - 可编辑状态带主题色细边框 */
+.el-input__wrapper {
+    background-color: var(--neu-bg) !important;
+    box-shadow: inset 2px 2px 4px var(--neu-shadow-dark),
+                inset -2px -2px 4px var(--neu-shadow-light) !important;
+    border: 1px solid rgba(108, 92, 231, 0.25) !important;
+    border-radius: var(--neu-radius-sm) !important;
+}
+
+.el-input__wrapper:hover {
+    box-shadow: inset 2px 2px 5px var(--neu-shadow-dark),
+                inset -2px -2px 5px var(--neu-shadow-light) !important;
+    border-color: rgba(108, 92, 231, 0.6) !important;
+}
+
+.el-input__wrapper.is-focus {
+    box-shadow: inset 2px 2px 5px var(--neu-shadow-dark),
+                inset -2px -2px 5px var(--neu-shadow-light) !important;
+    border-color: rgba(108, 92, 231, 0.8) !important;
+}
+
+.el-input__inner {
+    color: var(--neu-text-primary) !important;
+}
+
+.el-input__inner::placeholder {
+    color: var(--neu-text-muted) !important;
+}
+
+/* 禁用状态输入框 - 无主题色边框 */
+.el-input.is-disabled .el-input__wrapper {
+    background-color: var(--neu-bg) !important;
+    box-shadow: inset 1px 1px 3px var(--neu-shadow-dark),
+                inset -1px -1px 3px var(--neu-shadow-light) !important;
+    border: 1px solid transparent !important;
+}
+
+/* 禁用状态输入框文字颜色 */
+.el-input.is-disabled .el-input__inner {
+    color: #8a8e96 !important;
+    -webkit-text-fill-color: #8a8e96 !important;
+}
+
+/* Select 下拉框轻拟态 */
+.el-select .el-input__wrapper {
+    background-color: var(--neu-bg) !important;
+    box-shadow: inset 2px 2px 4px var(--neu-shadow-dark),
+                inset -2px -2px 4px var(--neu-shadow-light) !important;
+    border-radius: var(--neu-radius-sm) !important;
+    border: 1px solid rgba(108, 92, 231, 0.25) !important;
+}
+
+.el-select .el-input.is-focus .el-input__wrapper,
+.el-select .el-input__wrapper.is-focus {
+    box-shadow: inset 2px 2px 5px var(--neu-shadow-dark),
+                inset -2px -2px 5px var(--neu-shadow-light) !important;
+    border-color: rgba(108, 92, 231, 0.8) !important;
+    outline: none !important;
+}
+
+/* Select 聚焦时覆盖 Element Plus 默认蓝色 */
+.el-select .el-input__wrapper:focus,
+.el-select .el-input__wrapper:focus-visible {
+    border-color: rgba(108, 92, 231, 0.8) !important;
+    outline: none !important;
+    box-shadow: inset 2px 2px 5px var(--neu-shadow-dark),
+                inset -2px -2px 5px var(--neu-shadow-light) !important;
+}
+
+/* Select 启用状态文字颜色 */
+.el-select .el-input__inner {
+    color: var(--neu-text-primary) !important;
+}
+
+/* Select 禁用状态文字颜色 */
+.el-select.is-disabled .el-input__inner {
+    color: #8a8e96 !important;
+    -webkit-text-fill-color: #8a8e96 !important;
+}
+
+/* Select 禁用状态整体 - 无主题色边框 */
+.el-select.is-disabled .el-input__wrapper {
+    box-shadow: inset 1px 1px 3px var(--neu-shadow-dark),
+                inset -1px -1px 3px var(--neu-shadow-light) !important;
+    border: 1px solid transparent !important;
+}
+
+/* Select 启用状态箭头图标 */
+.el-select .el-select__caret {
+    color: var(--neu-text-muted) !important;
+}
+
+/* Select suffix 区域适配 */
+.el-select .el-input__suffix {
+    color: var(--neu-text-muted) !important;
+}
+
+/* Switch 轻拟态 */
+.el-switch {
+    --el-switch-on-color: var(--neu-accent) !important;
+    --el-switch-off-color: var(--neu-text-muted) !important;
+}
+
+/* 按钮轻拟态 */
+.el-button--primary {
+    background-color: var(--neu-accent) !important;
+    border-color: var(--neu-accent) !important;
+    box-shadow: 3px 3px 6px var(--neu-shadow-dark),
+                -2px -2px 6px var(--neu-shadow-light) !important;
+    border: none !important;
+}
+
+.el-button--primary:hover {
+    background-color: var(--neu-accent-light) !important;
+    box-shadow: 2px 2px 4px var(--neu-shadow-dark),
+                -1px -1px 4px var(--neu-shadow-light) !important;
+}
+
+.el-button--primary.is-plain {
+    background-color: var(--neu-bg-card) !important;
+    color: var(--neu-accent) !important;
+    border: none !important;
+    box-shadow: 3px 3px 6px var(--neu-shadow-dark),
+                -2px -2px 6px var(--neu-shadow-light) !important;
+}
+
+.el-button--primary.is-plain:hover {
+    background-color: var(--neu-bg-card) !important;
+    color: var(--neu-accent-light) !important;
+    box-shadow: 2px 2px 4px var(--neu-shadow-dark),
+                -1px -1px 4px var(--neu-shadow-light) !important;
+}
+
+.el-button--success {
+    background-color: var(--neu-success) !important;
+    border-color: var(--neu-success) !important;
+    box-shadow: 3px 3px 6px var(--neu-shadow-dark),
+                -2px -2px 6px var(--neu-shadow-light) !important;
+    border: none !important;
+}
+
+.el-button--success.is-plain {
+    background-color: var(--neu-bg-card) !important;
+    color: var(--neu-success) !important;
+    border: none !important;
+    box-shadow: 3px 3px 6px var(--neu-shadow-dark),
+                -2px -2px 6px var(--neu-shadow-light) !important;
+}
+
+.el-button--danger {
+    background-color: var(--neu-danger) !important;
+    border-color: var(--neu-danger) !important;
+    box-shadow: 3px 3px 6px var(--neu-shadow-dark),
+                -2px -2px 6px var(--neu-shadow-light) !important;
+    border: none !important;
+}
+
+.el-button--danger.is-plain {
+    background-color: var(--neu-bg-card) !important;
+    color: var(--neu-danger) !important;
+    border: none !important;
+    box-shadow: 3px 3px 6px var(--neu-shadow-dark),
+                -2px -2px 6px var(--neu-shadow-light) !important;
+}
+
+.el-button--danger.is-plain:hover {
+    background-color: var(--neu-bg-card) !important;
+    color: var(--neu-danger) !important;
+    box-shadow: 2px 2px 4px var(--neu-shadow-dark),
+                -1px -1px 4px var(--neu-shadow-light) !important;
+}
+
+/* 默认按钮轻拟态 */
+.el-button--default {
+    background-color: var(--neu-bg-card) !important;
+    border: none !important;
+    box-shadow: 3px 3px 6px var(--neu-shadow-dark),
+                -2px -2px 6px var(--neu-shadow-light) !important;
+    color: var(--neu-text-secondary) !important;
+}
+
+.el-button--default:hover {
+    color: var(--neu-accent) !important;
+    box-shadow: 2px 2px 4px var(--neu-shadow-dark),
+                -1px -1px 4px var(--neu-shadow-light) !important;
+}
+
+/* Tabs 轻拟态 */
+.el-tabs__item {
+    color: var(--neu-text-secondary) !important;
+    font-weight: 500 !important;
+}
+
+.el-tabs__item.is-active {
+    color: var(--neu-accent) !important;
+    font-weight: 600 !important;
+}
+
+.el-tabs__active-bar {
+    background-color: var(--neu-accent) !important;
+}
+
+.el-tabs__nav-wrap::after {
+    background-color: var(--neu-shadow-dark) !important;
+    opacity: 0.2 !important;
+}
+
+/* Dialog 轻拟态 */
+.el-dialog {
+    background-color: var(--neu-bg-card) !important;
+    border-radius: var(--neu-radius) !important;
+    box-shadow: 6px 6px 14px var(--neu-shadow-dark),
+                -4px -4px 14px var(--neu-shadow-light) !important;
+    border: none !important;
+}
+
+.el-dialog__header {
+    border-bottom: none !important;
+}
+
+.el-dialog__title {
+    color: var(--neu-text-primary) !important;
+    font-weight: 600 !important;
+}
+
+.el-dialog__body {
+    color: var(--neu-text-secondary) !important;
+}
+
+/* MessageBox 轻拟态 */
+.el-message-box {
+    background-color: var(--neu-bg-card) !important;
+    border-radius: var(--neu-radius) !important;
+    box-shadow: 6px 6px 14px var(--neu-shadow-dark),
+                -4px -4px 14px var(--neu-shadow-light) !important;
+    border: none !important;
+}
+
+.el-message-box__title {
+    color: var(--neu-text-primary) !important;
+}
+
+.el-message-box__message {
+    color: var(--neu-text-secondary) !important;
+}
+
+/* ElMessage 从右下角弹出 + 轻拟态 */
 .el-message {
     top: auto !important;
     bottom: 20px !important;
     left: auto !important;
     right: 20px !important;
     transform: none !important;
+    background-color: var(--neu-bg-card) !important;
+    border: none !important;
+    border-radius: var(--neu-radius-sm) !important;
+    box-shadow: 4px 4px 10px var(--neu-shadow-dark),
+                -3px -3px 10px var(--neu-shadow-light) !important;
+}
+
+.el-message .el-message__content {
+    color: var(--neu-text-primary) !important;
+}
+
+/* Form 轻拟态 */
+.el-form-item__label {
+    color: var(--neu-text-secondary) !important;
+}
+
+/* ========== Select 下拉面板轻拟态（全局，因为面板挂载在 body 下） ========== */
+.el-select-dropdown {
+    background-color: var(--neu-bg-card) !important;
+    border: none !important;
+    border-radius: var(--neu-radius-sm) !important;
+    box-shadow: 4px 4px 10px var(--neu-shadow-dark),
+                -3px -3px 10px var(--neu-shadow-light) !important;
+}
+
+.el-select-dropdown__item {
+    color: var(--neu-text-secondary) !important;
+    border-radius: 6px !important;
+    margin: 2px 6px !important;
+    padding-left: 14px !important;
+    transition: all 0.15s ease !important;
+}
+
+.el-select-dropdown__item:hover {
+    background-color: var(--neu-bg) !important;
+    color: var(--neu-text-primary) !important;
+    box-shadow: inset 1px 1px 3px var(--neu-shadow-dark),
+                inset -1px -1px 3px var(--neu-shadow-light) !important;
+}
+
+.el-select-dropdown__item.is-selected {
+    color: var(--neu-text-primary) !important;
+    font-weight: 600 !important;
+}
+
+.el-select-dropdown__item.is-disabled {
+    color: var(--neu-text-muted) !important;
+    cursor: not-allowed !important;
+}
+
+/* Select popper 箭头隐藏 */
+.el-popper.is-light .el-popper__arrow::before {
+    background-color: var(--neu-bg-card) !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.el-popper.is-light .el-popper__arrow::after {
+    background-color: var(--neu-bg-card) !important;
+}
+
+/* 滚动条 */
+::-webkit-scrollbar {
+    width: 5px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: rgba(163, 177, 198, 0.3);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(163, 177, 198, 0.5);
 }

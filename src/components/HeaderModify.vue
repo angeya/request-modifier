@@ -122,12 +122,19 @@ function removeRule(id: number): void {
 .section-title {
   margin: 0;
   font-size: 14px;
-  font-weight: 600;
-  color: #303133;
+  font-weight: 700;
+  color: var(--neu-text-primary);
+  letter-spacing: 0.5px;
 }
 
 .rule-card {
   margin-bottom: 8px;
+  transition: box-shadow 0.2s;
+}
+
+.rule-card:hover {
+  box-shadow: 5px 5px 10px var(--neu-shadow-dark),
+              -5px -5px 10px var(--neu-shadow-light);
 }
 
 .rule-row {

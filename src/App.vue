@@ -127,33 +127,43 @@ function openHelpPage() {
   display: flex;
   align-items: center;
   flex-shrink: 0;
-  padding-bottom: 8px;
+  padding: 10px 16px;
+  background-color: var(--neu-bg-card);
+  border-radius: var(--neu-radius);
+  box-shadow: 3px 3px 8px var(--neu-shadow-dark),
+              -3px -3px 8px var(--neu-shadow-light);
+  margin-bottom: 10px;
+  overflow: hidden;
 }
 
 .app-title {
-  color: #303133;
+  color: var(--neu-text-primary);
   margin: 0;
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 700;
+  letter-spacing: 0.5px;
 }
 
 .power-btn {
   margin-left: 12px;
   padding: 4px !important;
+  border-radius: 50% !important;
+  box-shadow: 2px 2px 4px var(--neu-shadow-dark),
+              -2px -2px 4px var(--neu-shadow-light) !important;
 }
 
 .status-text {
-  margin-left: 6px;
+  margin-left: 8px;
   font-size: 13px;
   font-weight: 500;
 }
 
 .status-on {
-  color: #67c23a;
+  color: var(--neu-success);
 }
 
 .status-off {
-  color: #909399;
+  color: var(--neu-text-muted);
 }
 
 .status-gif {
@@ -166,6 +176,11 @@ function openHelpPage() {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  padding: 10px 14px;
+  background-color: var(--neu-bg);
+  border-radius: var(--neu-radius);
+  box-shadow: inset 2px 2px 5px var(--neu-shadow-dark),
+              inset -2px -2px 5px var(--neu-shadow-light);
 }
 
 .tabs-wrapper :deep(.el-tabs) {
@@ -177,6 +192,8 @@ function openHelpPage() {
 
 .tabs-wrapper :deep(.el-tabs__header) {
   margin-bottom: 0;
+  border-radius: var(--neu-radius-sm);
+  overflow: hidden;
 }
 
 .tabs-wrapper :deep(.el-tabs__content) {
@@ -202,17 +219,19 @@ function openHelpPage() {
   width: 7px;
   height: 7px;
   border-radius: 50%;
+  box-shadow: inset 1px 1px 2px var(--neu-shadow-dark),
+              inset -1px -1px 2px var(--neu-shadow-light);
 }
 
 .dot-on {
-  background-color: #67c23a;
+  background-color: var(--neu-success);
 }
 
 .dot-off {
-  background-color: #dcdfe6;
+  background-color: var(--neu-text-muted);
 }
 
-/* 美化滚动条 */
+/* 滚动条 */
 .tabs-wrapper :deep(.el-tab-pane)::-webkit-scrollbar {
   width: 5px;
 }
@@ -222,12 +241,12 @@ function openHelpPage() {
 }
 
 .tabs-wrapper :deep(.el-tab-pane)::-webkit-scrollbar-thumb {
-  background-color: #c0c4cc;
+  background-color: rgba(163, 177, 198, 0.3);
   border-radius: 3px;
 }
 
 .tabs-wrapper :deep(.el-tab-pane)::-webkit-scrollbar-thumb:hover {
-  background-color: #909399;
+  background-color: rgba(163, 177, 198, 0.5);
 }
 
 .footer-bar {
@@ -235,27 +254,32 @@ function openHelpPage() {
   justify-content: space-between;
   align-items: center;
   flex-shrink: 0;
-  padding: 8px 0 0;
-  border-top: 1px solid #ebeef5;
-  margin-top: 6px;
+  padding: 10px 16px;
+  margin-top: 10px;
+  background-color: var(--neu-bg-card);
+  border-radius: var(--neu-radius);
+  box-shadow: 3px 3px 8px var(--neu-shadow-dark),
+              -3px -3px 8px var(--neu-shadow-light);
+  overflow: hidden;
 }
 
 .footer-link {
   font-size: 12px;
-  color: #409eff;
+  color: var(--neu-accent);
   text-decoration: none;
   cursor: pointer;
+  transition: color 0.2s;
 }
 
 .footer-link:hover {
-  color: #66b1ff;
+  color: var(--neu-accent-light);
 }
 
 .appreciate-link {
-  color: #909399;
+  color: var(--neu-text-muted);
 }
 
 .appreciate-link:hover {
-  color: #409eff;
+  color: var(--neu-accent);
 }
 </style>
