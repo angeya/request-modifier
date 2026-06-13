@@ -19,7 +19,7 @@
       <el-input class="rule-input" v-model="rule.match" :disabled="!rule.isEditing"
              placeholder="匹配值，支持正则" size="small"/>
       <el-input class="rule-input" v-model="rule.replace" :disabled="!rule.isEditing"
-             placeholder="替换值" size="small"/>
+             :placeholder="rule.isEditing ? '替换值' : ''" size="small"/>
       <el-switch v-model="rule.enabled" @change="doSaveRule()" size="small"/>
       <div class="rule-actions">
         <el-button :type="rule.isEditing ? 'success' : 'primary'" :plain="!rule.isEditing" size="small" @click="rule.isEditing ? saveRule(rule) : (rule.isEditing = true)">{{ rule.isEditing ? '保存' : '编辑' }}</el-button>

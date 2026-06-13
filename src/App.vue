@@ -254,8 +254,8 @@ function openHelpPage() {
   justify-content: space-between;
   align-items: center;
   flex-shrink: 0;
-  padding: 10px 16px;
-  margin-top: 10px;
+  padding: 2px 16px;
+  margin-top: 4px;
   background-color: var(--neu-bg-card);
   border-radius: var(--neu-radius);
   box-shadow: 3px 3px 8px var(--neu-shadow-dark),
