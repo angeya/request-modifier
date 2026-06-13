@@ -41,3 +41,12 @@ body {
     height: 100%;
     overflow: hidden;
 }
+
+/* ElMessage 从右下角弹出 */
+.el-message {
+    top: auto !important;
+    bottom: 20px !important;
+    left: auto !important;
+    right: 20px !important;
+    transform: none !important;
+}

@@ -5,6 +5,7 @@
   "description": "请求修改工具，支持Chrome和Edge。",
   "permissions": [
     "declarativeNetRequest",
+    "declarativeNetRequestWithHostAccess",
     "storage"
   ],
   "host_permissions": [

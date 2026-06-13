@@ -32,8 +32,9 @@
 
 <script setup lang="ts">
 import {onMounted, ref, toRaw} from 'vue'
-import {saveRuleList, saveTestUrl, getTestUrl, loadRuleList, updateDynamicRules} from '../api/chromeApi'
+import {saveRuleList, saveTestUrl, getTestUrl, loadRuleList} from '../api/chromeApi'
 import type {Rule} from '../types'
+import {ElMessage, ElMessageBox} from 'element-plus'
 
 
 interface TestUrl {
@@ -87,7 +88,10 @@ function addRule(): void {
  * 保存规则
  */
 function saveRule(rule: Rule): void {
-  console.log('最新列表数值：' + JSON.stringify(ruleListRef.value))
+  if (!rule.match) {
+    ElMessage.warning('URL匹配值不能为空')
+    return
+  }
   rule.isEditing = false
   doSaveRule()
 }
@@ -99,7 +103,6 @@ function doSaveRule(): void {
   console.log('最新列表数值：' + JSON.stringify(ruleListRef.value))
   // 数据持久化的时候需要脱响应式，否则数据机构可能与预期不符
   saveRuleList(toRaw(ruleListRef.value));
-  updateDynamicRules(ruleListRef.value)
   updateUrlTestResult()
 }
 
@@ -113,8 +116,17 @@ function saveAndUpdateUrlTestResult(testUrl: string) {
  * @param id
  */
 function removeRule(id: number): void {
-  ruleListRef.value = ruleListRef.value.filter(rule => rule.id !== id)
-  doSaveRule()
+  ElMessageBox.confirm('确定要删除该规则吗？', '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  }).then(() => {
+    ruleListRef.value = ruleListRef.value.filter(rule => rule.id !== id)
+    doSaveRule()
+    ElMessage.success('删除成功')
+  }).catch(() => {
+    // 用户取消删除
+  })
 }
 
 /**
@@ -129,7 +141,7 @@ function updateUrlTestResult(): void {
 
   let modifiedUrl = testUrl;
   for (const rule of rules) {
-    if (rule.enabled && rule.match && rule.replace) {
+    if (rule.enabled && rule.match) {
       try {
         const regex = new RegExp(rule.match, 'g');
         modifiedUrl = modifiedUrl.replace(regex, rule.replace);

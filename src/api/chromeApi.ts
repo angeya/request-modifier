@@ -52,7 +52,8 @@ export async function loadHeaderRuleList(): Promise<HeaderRule[]> {
 export async function saveRuleList(ruleList: Rule[]): Promise<void> {
     console.log('保存重定向规则' + JSON.stringify(ruleList))
     await chrome.storage.sync.set({'ruleList': ruleList})
-    await updateDynamicRules(ruleList)
+    const headerRuleList: HeaderRule[] = await loadHeaderRuleList()
+    await updateDynamicRules(ruleList, headerRuleList)
 }
 
 /**
@@ -150,7 +151,7 @@ export async function updateDynamicRules(ruleList?: Rule[], headerRuleList?: Hea
         console.log('更新重定向规则' + JSON.stringify(ruleList))
         const redirectRules = ruleList
             .map((rule): DeclarativeRule | null => {
-                const isValid = rule.enabled && rule.match && rule.replace;
+                const isValid = rule.enabled && rule.match;
                 if (!isValid) {
                     return null;
                 }
@@ -168,7 +169,6 @@ export async function updateDynamicRules(ruleList?: Rule[], headerRuleList?: Hea
                             regexFilter: rule.match,
                             resourceTypes: ['main_frame', 'sub_frame', 'xmlhttprequest', 'websocket',
                                 'media', 'image', 'stylesheet','object','font','webtransport','ping','other'],
-                            excludedRequestDomains: [],
                             isUrlFilterCaseSensitive: false
                         }
                     };
@@ -192,32 +192,42 @@ export async function updateDynamicRules(ruleList?: Rule[], headerRuleList?: Hea
                     return null;
                 }
                 try {
-                    // 根据规则类型构建不同的动作
+                    // 构建 Header 操作项
+                    const isRemove = rule.headerValue === '';
+                    const headerOperation: chrome.declarativeNetRequest.ModifyHeaderInfo = {
+                        header: rule.headerName,
+                        operation: isRemove ? 'remove' : 'set'
+                    };
+                    if (!isRemove) {
+                        headerOperation.value = rule.headerValue;
+                    }
+
+                    // 根据规则类型构建动作，不设置的字段需完全省略而非设为 undefined
                     const action: chrome.declarativeNetRequest.RuleAction = {
                         type: 'modifyHeaders',
-                        requestHeaders: rule.type === 'request' ? [{
-                            header: rule.headerName,
-                            operation: rule.headerValue === '' ? 'remove' : 'set',
-                            value: rule.headerValue
-                        }] : undefined,
-                        responseHeaders: rule.type === 'response' ? [{
-                            header: rule.headerName,
-                            operation: rule.headerValue === '' ? 'remove' : 'set',
-                            value: rule.headerValue
-                        }] : undefined
+                        ...(rule.type === 'request'
+                            ? { requestHeaders: [headerOperation] }
+                            : { responseHeaders: [headerOperation] })
                     };
                     
+                    // 匹配URL为空时使用 urlFilter 通配符匹配所有请求
+                    // regexFilter 不支持 ".*" 这种过于宽泛的正则，改用 urlFilter
+                    const condition: chrome.declarativeNetRequest.RuleCondition = {
+                        resourceTypes: ['main_frame', 'sub_frame', 'xmlhttprequest', 'websocket',
+                            'media', 'image', 'stylesheet','object','font','webtransport','ping','other'],
+                        isUrlFilterCaseSensitive: false
+                    };
+                    if (rule.match) {
+                        condition.regexFilter = rule.match;
+                    } else {
+                        condition.urlFilter = '*';
+                    }
+
                     return {
                         id: rule.id + 10000, // 避免ID冲突，请求头规则使用10000以上的ID
                         priority: 1,
                         action,
-                        condition: {
-                            regexFilter: rule.match || '.*', // 为空时匹配所有请求
-                            resourceTypes: ['main_frame', 'sub_frame', 'xmlhttprequest', 'websocket',
-                                'media', 'image', 'stylesheet','object','font','webtransport','ping','other'],
-                            excludedRequestDomains: [],
-                            isUrlFilterCaseSensitive: false
-                        }
+                        condition
                     };
                 } catch (e) {
                     console.error(`请求头规则 ${rule.match} 无效:`, e);

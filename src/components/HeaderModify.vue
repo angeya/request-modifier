@@ -16,8 +16,8 @@
     </div>
     <!-- 第二行：类型、请求头/响应头名称和值 -->
     <div class="rule-row" style="margin-top: 8px;">
-      <el-select v-model="rule.type" :disabled="!rule.isEditing" style="width: 90px; flex-shrink: 0;" placeholder="类型" size="small">
-        <el-option v-for="opt in headerTypeOptions" :key="opt.value" :label="opt.label" :value="opt.value"/>
+      <el-select v-model="rule.type" :disabled="!rule.isEditing" style="width: 130px; flex-shrink: 0;" placeholder="类型" size="small">
+        <el-option v-for="opt in headerTypeOptions" :key="opt.value" :label="opt.label" :value="opt.value" :disabled="opt.disabled"/>
       </el-select>
       <el-input class="rule-input" v-model="rule.headerName" :disabled="!rule.isEditing" 
                :placeholder="rule.type === 'request' ? '请求头名称' : '响应头名称'" size="small"></el-input>
@@ -31,11 +31,12 @@
 import {onMounted, ref, toRaw} from 'vue'
 import {saveHeaderRuleList, loadHeaderRuleList} from '../api/chromeApi'
 import type {HeaderRule} from '../types'
+import {ElMessage, ElMessageBox} from 'element-plus'
 
 // 头类型选项
 const headerTypeOptions = [
   {label: '请求头', value: 'request'},
-  {label: '响应头', value: 'response'}
+  {label: '响应头（暂不支持）', value: 'response', disabled: true}
 ]
 
 const headerRuleListRef = ref<HeaderRule[]>([])
@@ -74,6 +75,10 @@ function addRule(): void {
  * 保存规则
  */
 function saveRule(rule: HeaderRule): void {
+  if (!rule.headerName) {
+    ElMessage.warning('Header名称不能为空')
+    return
+  }
   rule.isEditing = false
   doSaveRule()
 }
@@ -92,8 +97,17 @@ function doSaveRule(): void {
  * @param id 规则id
  */
 function removeRule(id: number): void {
-  headerRuleListRef.value = headerRuleListRef.value.filter(rule => rule.id !== id)
-  doSaveRule()
+  ElMessageBox.confirm('确定要删除该规则吗？', '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  }).then(() => {
+    headerRuleListRef.value = headerRuleListRef.value.filter(rule => rule.id !== id)
+    doSaveRule()
+    ElMessage.success('删除成功')
+  }).catch(() => {
+    // 用户取消删除
+  })
 }
 </script>
 
