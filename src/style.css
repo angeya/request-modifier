@@ -23,6 +23,17 @@
     --el-color-primary-light-9: #e5dbfa;
     --el-color-primary-dark-2: #5649c9;
 
+    /* 覆盖 Element Plus Select 聚焦边框色 */
+    --el-select-border-color-hover: rgba(108, 92, 231, 0.6);
+    --el-select-focus-border-color: rgba(108, 92, 231, 0.8);
+
+    /* 覆盖 Element Plus Input 聚焦/悬停边框色 */
+    --el-input-focus-border-color: rgba(108, 92, 231, 0.8);
+    --el-input-hover-border-color: rgba(108, 92, 231, 0.6);
+
+    /* 覆盖 Element Plus 填充背景色 */
+    --el-fill-color-blank: #f0f2f5;
+
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     line-height: 1.5;
     font-weight: 400;
@@ -132,21 +143,27 @@ body {
     border: 1px solid rgba(108, 92, 231, 0.25) !important;
 }
 
+/* Select hover 状态 */
+.el-select:hover .el-input__wrapper {
+    border-color: rgba(108, 92, 231, 0.6) !important;
+}
+
+/* Select 聚焦状态 - 多重选择器覆盖蓝色 */
 .el-select .el-input.is-focus .el-input__wrapper,
-.el-select .el-input__wrapper.is-focus {
+.el-select .el-input__wrapper.is-focus,
+.el-select.is-focus .el-input__wrapper,
+.el-select .el-input__wrapper:focus,
+.el-select .el-input__wrapper:focus-visible {
     box-shadow: inset 2px 2px 5px var(--neu-shadow-dark),
                 inset -2px -2px 5px var(--neu-shadow-light) !important;
     border-color: rgba(108, 92, 231, 0.8) !important;
     outline: none !important;
 }
 
-/* Select 聚焦时覆盖 Element Plus 默认蓝色 */
-.el-select .el-input__wrapper:focus,
-.el-select .el-input__wrapper:focus-visible {
-    border-color: rgba(108, 92, 231, 0.8) !important;
-    outline: none !important;
-    box-shadow: inset 2px 2px 5px var(--neu-shadow-dark),
-                inset -2px -2px 5px var(--neu-shadow-light) !important;
+/* 强制覆盖 Element Plus Select 聚焦时的 box-shadow（蓝色光晕） */
+.el-select .el-input__wrapper {
+    --el-input-focus-border-color: rgba(108, 92, 231, 0.8) !important;
+    --el-input-hover-border-color: rgba(108, 92, 231, 0.6) !important;
 }
 
 /* Select 启用状态文字颜色 */
@@ -328,11 +345,11 @@ body {
 
 /* ElMessage 从右下角弹出 + 轻拟态 */
 .el-message {
-    top: auto !important;
-    bottom: 20px !important;
-    left: auto !important;
-    right: 20px !important;
-    transform: none !important;
+    top: 30px !important;
+    bottom: auto !important;
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) !important;
     background-color: var(--neu-bg-card) !important;
     border: none !important;
     border-radius: var(--neu-radius-sm) !important;
@@ -375,7 +392,7 @@ body {
 
 .el-select-dropdown__item.is-selected {
     color: var(--neu-text-primary) !important;
-    font-weight: 600 !important;
+    font-weight: normal !important;
 }
 
 .el-select-dropdown__item.is-disabled {

@@ -73,7 +73,6 @@ export function getStorage(keys: string[]): Promise<Record<string, any>> {
             if (chrome.runtime.lastError) {
                 reject(chrome.runtime.lastError);
             } else {
-                console.log('获取存储 Is array?', Array.isArray(result.ruleList))
                 resolve(result);
             }
         });
@@ -85,7 +84,6 @@ export function getStorage(keys: string[]): Promise<Record<string, any>> {
  */
 export async function getTestUrl(): Promise<string> {
     const data = await getStorage(['testUrl']);
-    console.log('读取：' + data)
     return data.testUrl || '';
 }
 
@@ -103,7 +101,6 @@ export async function saveTestUrl(testUrl: string): Promise<void> {
  */
 export async function getPluginStatus(): Promise<boolean> {
     const data = await getStorage(['enabledPlugin']);
-    console.log('读取：' + data)
     return data.enabledPlugin || false;
 }
 
@@ -113,7 +110,6 @@ export async function getPluginStatus(): Promise<boolean> {
 export async function disablePlugin(): Promise<void> {
     await chrome.storage.sync.set({'enabledPlugin': false})
     const dynamicRules = await chrome.declarativeNetRequest.getDynamicRules();
-    console.log({dynamicRules});
     const removeRuleIds = dynamicRules.map(rule => rule.id);
     await chrome.declarativeNetRequest.updateDynamicRules({
         removeRuleIds,
@@ -261,32 +257,3 @@ function updateIcon(enabled: boolean): void {
         path: enabled ? './icon_enabled.png' : './icon_disabled.png'
     });
 }
-
-// /**
-//  * 监听存储变化
-//  */
-// chrome.storage.sync.onChanged.addListener(() => {
-//     console.log('插件数据变化')
-//     chrome.storage.sync.get(['rules', 'enabled'], (data) => {
-//         const rules = (data.rules?.value as Rule[]) || [];
-//         const enabled = data.enabled?.value !== false;
-//         updateDynamicRules(rules);
-//         updateIcon(enabled);
-//     });
-// });
-//
-// /**
-//  * 初始化：设置默认禁用状态
-//  */
-// chrome.runtime.onInstalled.addListener(() => {
-//     console.log('插件初始化')
-//     chrome.storage.sync.get(['ruleList', 'enabled'], (data) => {
-//         const ruleList = (data.ruleList?.value as Rule[]) || [];
-//         const enabled =
-//             data.enabled?.value === undefined ? false : (data.enabled.value as boolean);
-//         chrome.storage.sync.set({enabled}, () => {
-//             updateDynamicRules(ruleList);
-//             updateIcon(enabled);
-//         });
-//     });
-// });

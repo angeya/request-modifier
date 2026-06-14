@@ -29,25 +29,29 @@
         <!-- 请求重定向 -->
         <section id="redirect">
           <h3>请求重定向</h3>
-          <p>将匹配到的 URL 请求重定向到指定的目标地址，常用于开发环境切换接口地址、调试第三方接口等场景。</p>
+          <p>将匹配到的 URL 请求重定向到指定的目标地址，常用于开发环境地址、端口切换等场景。</p>
           <h4>使用方法</h4>
+          <p>其实就是很简单的URL地址查找替换。</p>
           <ul>
-            <li><strong>匹配URL</strong>：输入要匹配的 URL 模式，支持正则表达式。例如：<code>https://example.com/api</code> 或 <code>.*example.*</code></li>
-            <li><strong>替换值</strong>：输入重定向的目标地址，支持正则替换语法。留空则将匹配内容替换为空串</li>
+            <li><strong>匹配值</strong>：输入要匹配的字符串，支持正则表达式。</li>
+            <li><strong>替换值</strong>：输入要替换的字符串，支持正则替换语法。留空则将匹配内容替换为空串</li>
             <li><strong>启用/禁用</strong>：通过开关控制单条规则是否生效</li>
-            <li><strong>编辑规则</strong>：点击"编辑"按钮进入编辑模式，修改后点击"保存"</li>
-            <li><strong>删除规则</strong>：点击"删除"按钮移除规则（需二次确认）</li>
+            <li><strong>编辑</strong>：点击"编辑"按钮进入编辑模式，修改后点击"保存"</li>
+            <li><strong>删除</strong>：点击"删除"按钮移除规则</li>
           </ul>
           <h4>示例</h4>
           <div class="example-block">
-            <p>将所有 <code>https://example.com</code> 的请求重定向到 <code>https://test.example.com</code>：</p>
+            <p>将所有 <code>https://www.baidu.com</code> 的请求重定向到 <code>https://www.taobao.com</code>：</p>
             <table class="example-table">
-              <tr><td class="label-col">匹配值</td><td><code>https://example.com(.*)</code></td></tr>
-              <tr><td class="label-col">替换值</td><td><code>https://test.example.com$1</code></td></tr>
+              <tr><td class="label-col">匹配值</td><td><code>baidu</code></td></tr>
+              <tr><td class="label-col">替换值</td><td><code>taobao</code></td></tr>
             </table>
+            <p>这样，只要在浏览器请求的地址包含<code>baidu</code>，都将其替换为<code>taobao</code></p>
           </div>
+          <p>如下图所示：</p>
+          <img :src="redirectImg" alt="请求重定向示例" class="help-img" />
           <h4>URL 测试</h4>
-          <p>在规则列表上方的测试区域输入待测试的 URL，可以实时预览重定向结果，方便验证规则是否正确。</p>
+          <p>在规则列表上方的测试区域输入待测试的 URL，可以实时预览URL重定向结果，方便验证规则是否正确。</p>
         </section>
 
         <!-- 请求头修改 -->
@@ -56,14 +60,9 @@
           <p>对匹配到的请求添加、修改或删除请求头，常用于模拟特定请求头、注入认证信息等场景。</p>
           <h4>使用方法</h4>
           <ul>
-            <li><strong>匹配URL</strong>：输入要匹配的 URL 模式，支持正则表达式。留空表示对所有请求生效</li>
-            <li><strong>Header 名称</strong>：输入要操作的请求头名称，如 <code>Authorization</code></li>
-            <li><strong>Header 值</strong>：
-              <ul>
-                <li>输入具体值：添加或修改该请求头</li>
-                <li>留空：删除该请求头</li>
-              </ul>
-            </li>
+            <li><strong>匹配URL</strong>：输入要匹配的 URL 字符串，只要URL包含则匹配，支持正则表达式。留空表示对所有请求生效</li>
+            <li><strong>请求头名称</strong>：输入要操作的请求头参数名称，如 <code>Authorization</code></li>
+            <li><strong>请求头值</strong>：要设置的请求头参数的值</li>
             <li><strong>启用/禁用</strong>：通过开关控制单条规则是否生效</li>
             <li><strong>编辑规则</strong>：点击"编辑"按钮进入编辑模式，修改后点击"保存"</li>
             <li><strong>删除规则</strong>：点击"删除"按钮移除规则（需二次确认）</li>
@@ -77,6 +76,8 @@
               <tr><td class="label-col">Header 值</td><td><code>Bearer your-token</code></td></tr>
             </table>
           </div>
+          <p>配置如下图所示：</p>
+          <img :src="headerImg" alt="请求头修改示例" class="help-img" />
         </section>
 
         <!-- 限制说明 -->
@@ -128,6 +129,8 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import redirectImg from '../assets/help/image-20260613214829682.png'
+import headerImg from '../assets/help/image-20260613215707462.png'
 
 /**
  * 导航项配置
@@ -164,7 +167,7 @@ function onScroll(e: Event): void {
     el: document.getElementById(item.id)
   }))
   for (let i = sections.length - 1; i >= 0; i--) {
-    const section = sections[i]
+    const section = sections[i]!
     if (section.el) {
       const rect = section.el.getBoundingClientRect()
       const containerRect = container.getBoundingClientRect()
@@ -397,6 +400,14 @@ code {
 }
 
 .restrict-table td code {
-  font-size: 12px;
+    font-size: 12px;
+}
+
+/* 帮助图片 */
+.help-img {
+    max-width: 75%;
+    border-radius: 6px;
+    border: 1px solid #ebeef5;
+    margin: 8px 0;
 }
 </style>

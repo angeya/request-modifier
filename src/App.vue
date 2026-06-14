@@ -4,19 +4,21 @@ import HeaderModify from "./components/HeaderModify.vue";
 import {onMounted, ref, computed} from "vue";
 import {disablePlugin, enablePlugin, getPluginStatus, loadRuleList, loadHeaderRuleList} from "./api/chromeApi.ts";
 import type {Rule, HeaderRule} from './types';
-import zhifubaoImg from './assets/zhifubao.jpg'
+import zhifubaoImg from './assets/zhifubao.png'
 
 const pluginStatus = ref(true)
 const ruleList = ref<Rule[]>([])
 const headerRuleList = ref<HeaderRule[]>([])
 const showAppreciate = ref(false)
 const activeTab = ref('requestRedirect')
+const installTime = ref<number | null>(null)
 
 onMounted(async () => {
   pluginStatus.value = await getPluginStatus()
   console.log('初始化状态', pluginStatus.value)
   
   await loadRuleLists()
+  await recordInstallTime()
   
   chrome.storage.onChanged.addListener((changes, namespace) => {
     if (namespace === 'sync') {
@@ -25,6 +27,43 @@ onMounted(async () => {
       }
     }
   })
+})
+
+/**
+ * 记录插件安装时间，首次安装时写入当前时间戳
+ */
+async function recordInstallTime() {
+  const result = await chrome.storage.sync.get('installTime')
+  if (result.installTime) {
+    installTime.value = result.installTime
+  } else {
+    const now = Date.now()
+    await chrome.storage.sync.set({ installTime: now })
+    installTime.value = now
+  }
+}
+
+/**
+ * 判断是否已安装超过2天
+ */
+const isInstalledOverTwoDays = computed(() => {
+  if (!installTime.value) return false
+  const twoDaysMs = 2 * 24 * 60 * 60 * 1000
+  return Date.now() - installTime.value > twoDaysMs
+})
+
+/**
+ * 总规则数
+ */
+const totalRuleCount = computed(() => {
+  return ruleList.value.length + headerRuleList.value.length
+})
+
+/**
+ * 是否显示赞赏链接
+ */
+const showAppreciateLink = computed(() => {
+  return isInstalledOverTwoDays.value && totalRuleCount.value > 0
 })
 
 async function loadRuleLists() {
@@ -102,7 +141,7 @@ function openHelpPage() {
     <!-- 底部栏 -->
     <div class="footer-bar">
       <a href="#" class="footer-link" @click.prevent="openHelpPage">帮助</a>
-      <a href="#" class="footer-link appreciate-link" @click.prevent="showAppreciate = true">如果插件有帮助到你，可以考虑赞赏哦1块钱哦</a>
+      <a href="#" class="footer-link appreciate-link" v-show="showAppreciateLink" @click.prevent="showAppreciate = true">如果插件有帮助到你，可以考虑赞赏1块钱哦</a>
     </div>
 
     <!-- 赞赏弹窗 -->
