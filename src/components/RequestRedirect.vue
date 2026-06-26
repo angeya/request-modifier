@@ -22,7 +22,7 @@
              :placeholder="rule.isEditing ? '替换值' : ''" size="small"/>
       <el-switch v-model="rule.enabled" @change="doSaveRule()" size="small"/>
       <div class="rule-actions">
-        <el-button :type="rule.isEditing ? 'success' : 'primary'" :plain="!rule.isEditing" size="small" @click="rule.isEditing ? saveRule(rule) : (rule.isEditing = true)">{{ rule.isEditing ? '保存' : '编辑' }}</el-button>
+        <el-button :type="rule.isEditing ? 'success' : 'primary'" size="small" @click="rule.isEditing ? saveRule(rule) : (rule.isEditing = true)">{{ rule.isEditing ? '保存' : '编辑' }}</el-button>
         <el-button type="danger" size="small" plain @click="removeRule(rule.id)">删除</el-button>
       </div>
     </div>
@@ -173,20 +173,18 @@ function updateUrlTestResult(): void {
 
 .section-title {
   margin: 0;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 700;
-  color: var(--neu-text-primary);
-  letter-spacing: 0.5px;
+  color: var(--app-text-primary);
 }
 
 .rule-card {
-  margin-bottom: 8px;
-  transition: box-shadow 0.2s;
+  margin-bottom: 10px;
+  transition: box-shadow 0.2s, transform 0.2s;
 }
 
 .rule-card:hover {
-  box-shadow: 5px 5px 10px var(--neu-shadow-dark),
-              -5px -5px 10px var(--neu-shadow-light);
+  box-shadow: var(--app-shadow-md);
 }
 
 .rule-row {
@@ -195,19 +193,37 @@ function updateUrlTestResult(): void {
   align-items: center;
 }
 
+.rule-row :deep(.el-switch) {
+  margin: 0 2px;
+  flex-shrink: 0;
+}
+
 .rule-input {
   flex: 1;
   min-width: 0;
 }
 
+.rule-input :deep(.el-input__wrapper) {
+  min-height: 28px;
+}
+
+.rule-input :deep(.el-input__inner) {
+  font-size: 14px;
+}
+
 .rule-actions {
   display: flex;
-  gap: 0;
+  gap: 4px;
   flex-shrink: 0;
 }
 
 .rule-actions :deep(.el-button) {
-  padding: 5px 6px;
-  font-size: 12px;
+  padding: 6px 8px;
+  font-size: 13px;
+  margin-left: 0;
+}
+
+.rule-actions :deep(.el-button + .el-button) {
+  margin-left: 0;
 }
 </style>

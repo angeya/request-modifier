@@ -95,6 +95,24 @@ export async function saveTestUrl(testUrl: string): Promise<void> {
     await chrome.storage.sync.set({'testUrl': testUrl})
 }
 
+const ACTIVE_TAB_KEY = 'activeTab'
+
+/**
+ * 获取上次选中的 tab 页
+ */
+export async function getActiveTab(): Promise<string> {
+    const data = await getStorage([ACTIVE_TAB_KEY]);
+    return data[ACTIVE_TAB_KEY] || 'requestRedirect'
+}
+
+/**
+ * 保存当前选中的 tab 页
+ * @param tab tab 名称
+ */
+export async function saveActiveTab(tab: string): Promise<void> {
+    await chrome.storage.sync.set({ [ACTIVE_TAB_KEY]: tab })
+}
+
 
 /**
  * 获取插件状态

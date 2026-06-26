@@ -1,8 +1,16 @@
 <script setup lang="ts">
 import RequestRedirect from './components/RequestRedirect.vue'
 import HeaderModify from "./components/HeaderModify.vue";
-import {onMounted, ref, computed} from "vue";
-import {disablePlugin, enablePlugin, getPluginStatus, loadRuleList, loadHeaderRuleList} from "./api/chromeApi.ts";
+import {onMounted, ref, computed, watch} from "vue";
+import {
+  disablePlugin,
+  enablePlugin,
+  getPluginStatus,
+  loadRuleList,
+  loadHeaderRuleList,
+  getActiveTab,
+  saveActiveTab
+} from "./api/chromeApi.ts";
 import type {Rule, HeaderRule} from './types';
 import zhifubaoImg from './assets/zhifubao.png'
 
@@ -16,10 +24,12 @@ const installTime = ref<number | null>(null)
 onMounted(async () => {
   pluginStatus.value = await getPluginStatus()
   console.log('初始化状态', pluginStatus.value)
-  
+
+  activeTab.value = await getActiveTab()
+
   await loadRuleLists()
   await recordInstallTime()
-  
+
   chrome.storage.onChanged.addListener((changes, namespace) => {
     if (namespace === 'sync') {
       if (changes.ruleList || changes.headerRuleList) {
@@ -27,6 +37,10 @@ onMounted(async () => {
       }
     }
   })
+})
+
+watch(activeTab, (newTab) => {
+  saveActiveTab(newTab)
 })
 
 /**
@@ -107,8 +121,8 @@ function openHelpPage() {
       <el-button class="power-btn" text v-show="!pluginStatus" @click="enable">
         <img src="./assets/power-off.svg" alt="">
       </el-button>
-      <span v-show="pluginStatus" class="status-text status-on">努力工作中...</span>
-      <span v-show="!pluginStatus" class="status-text status-off">安心休息中...</span>
+      <span v-show="pluginStatus" class="status-text status-on" @click="disable">努力工作中...</span>
+      <span v-show="!pluginStatus" class="status-text status-off" @click="enable">安心休息中...</span>
       
       <img v-show="pluginStatus" class="status-gif" style="height: 36px; width: 36px;" src="./assets/work.gif" alt="">
       <img v-show="!pluginStatus" class="status-gif" style="height: 36px; width: 36px;" src="./assets/sleep.gif" alt="">
@@ -166,47 +180,57 @@ function openHelpPage() {
   display: flex;
   align-items: center;
   flex-shrink: 0;
-  padding: 10px 16px;
-  background-color: var(--neu-bg-card);
-  border-radius: var(--neu-radius);
-  box-shadow: 3px 3px 8px var(--neu-shadow-dark),
-              -3px -3px 8px var(--neu-shadow-light);
-  margin-bottom: 10px;
+  padding: 10px 14px;
+  background-color: var(--app-bg-card);
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius);
+  box-shadow: var(--app-shadow);
+  margin-bottom: 8px;
   overflow: hidden;
 }
 
 .app-title {
-  color: var(--neu-text-primary);
+  color: var(--app-text-primary);
   margin: 0;
   font-size: 16px;
   font-weight: 700;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
 }
 
 .power-btn {
   margin-left: 12px;
   padding: 4px !important;
   border-radius: 50% !important;
-  box-shadow: 2px 2px 4px var(--neu-shadow-dark),
-              -2px -2px 4px var(--neu-shadow-light) !important;
+  background-color: transparent !important;
+  border: none !important;
+}
+
+.power-btn img {
+  width: 22px;
+  height: 22px;
+  display: block;
 }
 
 .status-text {
   margin-left: 8px;
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 700;
+  cursor: pointer;
+  user-select: none;
 }
 
 .status-on {
-  color: var(--neu-success);
+  color: var(--app-success);
 }
 
 .status-off {
-  color: var(--neu-text-muted);
+  color: var(--app-text-muted);
 }
 
 .status-gif {
   margin-left: auto;
+  width: 36px;
+  height: 36px;
 }
 
 .tabs-wrapper {
@@ -215,11 +239,11 @@ function openHelpPage() {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  padding: 10px 14px;
-  background-color: var(--neu-bg);
-  border-radius: var(--neu-radius);
-  box-shadow: inset 2px 2px 5px var(--neu-shadow-dark),
-              inset -2px -2px 5px var(--neu-shadow-light);
+  padding: 8px;
+  background-color: var(--app-bg-card);
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius);
+  box-shadow: var(--app-shadow);
 }
 
 .tabs-wrapper :deep(.el-tabs) {
@@ -231,20 +255,20 @@ function openHelpPage() {
 
 .tabs-wrapper :deep(.el-tabs__header) {
   margin-bottom: 0;
-  border-radius: var(--neu-radius-sm);
-  overflow: hidden;
+  border-bottom: 1px solid var(--app-border-light);
 }
 
 .tabs-wrapper :deep(.el-tabs__content) {
   flex: 1;
   min-height: 0;
   overflow: hidden;
-  padding: 10px 0;
+  padding-top: 8px;
 }
 
 .tabs-wrapper :deep(.el-tab-pane) {
   height: 100%;
   overflow-y: auto;
+  padding-right: 2px;
 }
 
 .tab-label {
@@ -258,16 +282,14 @@ function openHelpPage() {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  box-shadow: inset 1px 1px 2px var(--neu-shadow-dark),
-              inset -1px -1px 2px var(--neu-shadow-light);
 }
 
 .dot-on {
-  background-color: var(--neu-success);
+  background-color: var(--app-success);
 }
 
 .dot-off {
-  background-color: var(--neu-text-muted);
+  background-color: var(--app-text-muted);
 }
 
 /* 滚动条 */
@@ -280,12 +302,12 @@ function openHelpPage() {
 }
 
 .tabs-wrapper :deep(.el-tab-pane)::-webkit-scrollbar-thumb {
-  background-color: rgba(163, 177, 198, 0.3);
+  background-color: rgba(156, 163, 175, 0.4);
   border-radius: 3px;
 }
 
 .tabs-wrapper :deep(.el-tab-pane)::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(163, 177, 198, 0.5);
+  background-color: rgba(156, 163, 175, 0.6);
 }
 
 .footer-bar {
@@ -293,32 +315,30 @@ function openHelpPage() {
   justify-content: space-between;
   align-items: center;
   flex-shrink: 0;
-  padding: 2px 16px;
-  margin-top: 4px;
-  background-color: var(--neu-bg-card);
-  border-radius: var(--neu-radius);
-  box-shadow: 3px 3px 8px var(--neu-shadow-dark),
-              -3px -3px 8px var(--neu-shadow-light);
-  overflow: hidden;
+  padding: 3px 14px 2px;
+  margin-top: 2px;
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
 }
 
 .footer-link {
-  font-size: 12px;
-  color: var(--neu-accent);
+  font-size: 11px;
+  color: var(--app-accent);
   text-decoration: none;
   cursor: pointer;
   transition: color 0.2s;
 }
 
 .footer-link:hover {
-  color: var(--neu-accent-light);
+  color: var(--app-accent-light);
 }
 
 .appreciate-link {
-  color: var(--neu-text-muted);
+  color: var(--app-text-muted);
 }
 
 .appreciate-link:hover {
-  color: var(--neu-accent);
+  color: var(--app-accent);
 }
 </style>
