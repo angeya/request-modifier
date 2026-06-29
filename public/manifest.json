@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "请求修改器",
-  "version": "1.0",
-  "description": "请求修改工具，支持Chrome和Edge。",
+  "version": "0.0.1",
+  "description": "请求修改工具，支持Chrome和Edge等主流浏览器。",
   "permissions": [
     "declarativeNetRequest",
     "declarativeNetRequestWithHostAccess",
