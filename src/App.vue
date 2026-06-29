@@ -58,12 +58,12 @@ async function recordInstallTime() {
 }
 
 /**
- * 判断是否已安装超过2天
+ * 判断是否已安装超过7天
  */
-const isInstalledOverTwoDays = computed(() => {
+const isInstalledOverDays = computed(() => {
   if (!installTime.value) return false
-  const twoDaysMs = 2 * 24 * 60 * 60 * 1000
-  return Date.now() - installTime.value > twoDaysMs
+  const daysMs = 7 * 24 * 60 * 60 * 1000
+  return Date.now() - installTime.value > daysMs
 })
 
 /**
@@ -77,7 +77,7 @@ const totalRuleCount = computed(() => {
  * 是否显示赞赏链接
  */
 const showAppreciateLink = computed(() => {
-  return isInstalledOverTwoDays.value && totalRuleCount.value > 0
+  return isInstalledOverDays.value && totalRuleCount.value > 0
 })
 
 async function loadRuleLists() {
