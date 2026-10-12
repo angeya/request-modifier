@@ -56,7 +56,7 @@
                :placeholder="rule.isEditing ? '替换值' : ''" size="small"/>
       </div>
       <div class="rule-side">
-        <el-switch v-model="rule.enabled" @change="doSaveRule()"/>
+        <el-switch v-model="rule.enabled" @change="doSaveRule()" size="small"/>
         <el-button :type="rule.isEditing ? 'success' : 'primary'" size="small" @click="rule.isEditing ? saveRule(rule) : (rule.isEditing = true)">{{ rule.isEditing ? '保存' : '编辑' }}</el-button>
         <el-button type="danger" size="small" plain @click="removeRule(rule.id)">删除</el-button>
       </div>
@@ -156,6 +156,11 @@ function addRule(): void {
 function saveRule(rule: Rule): void {
   if (!rule.match) {
     ElMessage.warning('URL匹配值不能为空')
+    return
+  }
+  // 替换值包含匹配值时会导致内容被反复替换，禁止保存
+  if (rule.replace.includes(rule.match)) {
+    ElMessage.warning('替换值不能包含匹配值，避免无限替换')
     return
   }
   rule.isEditing = false
@@ -326,17 +331,13 @@ function updateUrlTestResult(): void {
   flex-shrink: 0;
 }
 
-/* 开关拉伸至与按钮同宽，高度与按钮一致 */
+/* 开关仅拉伸宽度与按钮对齐，高度保持small默认尺寸 */
 .rule-side :deep(.el-switch) {
   width: 100%;
-  height: 20px;
-  font-size: 12px;
-  line-height: 16px;
 }
 
 .rule-side :deep(.el-switch__core) {
   width: 100%;
-  height: 20px;
 }
 
 .rule-side :deep(.el-button) {
