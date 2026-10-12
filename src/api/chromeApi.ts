@@ -95,6 +95,32 @@ export async function saveTestUrl(testUrl: string): Promise<void> {
     await chrome.storage.sync.set({'testUrl': testUrl})
 }
 
+const UI_PREFS_KEY = 'uiPrefs'
+
+/**
+ * 读取界面偏好设置
+ * @param key 偏好项名称
+ * @param defaultValue 默认值
+ */
+export async function getUiPref<T>(key: string, defaultValue: T): Promise<T> {
+    const data = await getStorage([UI_PREFS_KEY])
+    const prefs = data[UI_PREFS_KEY] || {}
+    const value = prefs[key]
+    return value === undefined || value === null ? defaultValue : value
+}
+
+/**
+ * 保存界面偏好设置
+ * @param key 偏好项名称
+ * @param value 偏好值
+ */
+export async function saveUiPref(key: string, value: unknown): Promise<void> {
+    const data = await getStorage([UI_PREFS_KEY])
+    const prefs = data[UI_PREFS_KEY] || {}
+    prefs[key] = value
+    await chrome.storage.sync.set({[UI_PREFS_KEY]: prefs})
+}
+
 const ACTIVE_TAB_KEY = 'activeTab'
 
 /**
